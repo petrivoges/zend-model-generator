@@ -74,9 +74,16 @@ class Generator_Renderer
 		if($parents = $table->getParents()){
 			foreach ($parents as $parent => $rel){
 				
+				// remove prefixes
+				$function = $parent;
+				$pattern = '#^'.$table->getName().'_(.*)$#i';
+				if(preg_match($pattern, $function)){
+					$function = preg_replace($pattern, '\\1', $function);
+				}
+				
 				$methods['parents'][] = array(
 					'name' => $parent,
-					'function' => $table->formatFunctionName($parent),
+					'function' => $table->formatFunctionName($function),
 					'class' => $table->getModelName($parent),
 					'table' => $table->getTableName($parent)
 				);
