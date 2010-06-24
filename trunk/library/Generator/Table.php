@@ -88,6 +88,15 @@ class Generator_Table
 		return $this->formatClassName($name, 'table');
 	}
 	
+	
+	public function getTableBaseName($name = null)
+	{
+		if(!$name){$name=$this->getName();}
+		return $this->formatClassName($name, 'tbase');
+	}
+	
+	
+	
 	public function getBaseName($name = null)
 	{
 		if(!$name){$name=$this->getName();}
@@ -102,6 +111,11 @@ class Generator_Table
 	public function getTableExtension()
 	{
 		return $this->getOptions()->pattern->table->extends;
+	}
+	
+	public function getTableBaseExtension()
+	{
+		return $this->getOptions()->pattern->tbase->extends;
 	}
 	
 	public function getModelFilePath()
@@ -121,6 +135,13 @@ class Generator_Table
 	public function getTableFilePath()
 	{
 		$dir = $this->getOptions()->dir->tables;
+		if(!is_dir($dir)){ mkdir($dir, null, true); }
+		return $dir.DIRECTORY_SEPARATOR.$this->getFilename();
+	}
+	
+	public function getTableBaseFilePath()
+	{
+		$dir = $this->getOptions()->dir->btables;
 		if(!is_dir($dir)){ mkdir($dir, null, true); }
 		return $dir.DIRECTORY_SEPARATOR.$this->getFilename();
 	}
@@ -310,6 +331,10 @@ class Generator_Table
 			case 'base':
 				$pattern = $this->getOptions()->pattern->base->classname;
 				break;
+			case 'tbase':
+				$pattern = $this->getOptions()->pattern->tbase->classname;
+				break;
+			
 			default:
 				throw new Exception
 					('Cannot generate class name. Unkown type given: '.$type);

@@ -20,8 +20,9 @@ return array(
 		// directory where results will be saved
 		'dir' => array(
 			'models' 	=> './models',
+			'tables' 	=> './models/DbTable',
 			'base' 		=> './models/Base',
-			'tables' 	=> './models/DbTable'
+			'btables' 	=> './models/Base/DbTable'
 		),
 		// name patterns
 		'pattern' => array(
@@ -31,12 +32,18 @@ return array(
 			),
 			'table' => array(
 				'classname' => 'Model_DbTable_{table}',
-				'extends' => 'Model_DbTable_Abstract',
+				
 			),
 			'base' => array(
 				'classname' => 'Model_Base_{table}',
 				'extends' => 'Model_Base_Abstract',
 			),
+			
+			'tbase' => array(
+				'classname' => 'Model_Base_DbTable_{table}',
+				'extends' => 'Model_DbTable_Abstract',
+			),
+			
 		),
 		// custom variables 
 		'custom' => array(
