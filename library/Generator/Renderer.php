@@ -4,6 +4,7 @@ class Generator_Renderer
 {
 	const TEMPLATE_MODELS 	= './template/model.tpl';
 	const TEMPLATE_TABLES 	= './template/table.tpl';
+	const TEMPLATE_TBASE 	= './template/tbase.tpl';
 	const TEMPLATE_BASE 	= './template/base.tpl';
 	
 	private $_options = array();
@@ -89,6 +90,12 @@ class Generator_Renderer
 		
 		
 		unset($methods, $data);
+		
+		// render table base
+		
+		$result = $this->render($table, 'base', self::TEMPLATE_TBASE);
+		Generator::log('Saving '.$table->getTableBaseFilePath().'...');
+		$this->save($result, $table->getTableBaseFilePath());
 		
 		// render table
 		
