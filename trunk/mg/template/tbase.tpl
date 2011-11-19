@@ -2,6 +2,9 @@
 
 /**
  * Model Base Table template
+ * 
+ * @author Jacek Kobus <kobus.jacek@gmail.com>
+ * @version $Id: tbase.tpl 57 2010-11-02 14:22:41Z jacek $
  */
 
 /* @var $table Generator_Table */
@@ -41,12 +44,14 @@ if(!empty($parents)){
 <?endforeach;?>
  *
 <?endif?>
+ * @method <?=$table->getModelName()?> findOne()
+ *
  * @package   	<?=$table->custom()->package . PHP_EOL?>
  * @subpackage  <?=$table->custom()->subPackage . PHP_EOL?>
  * @author   	<?=$table->custom()->author?> <<?=$table->custom()->email?>>
  * @copyright	<?=$table->custom()->copyright . PHP_EOL?>
  * @license  	<?=$table->custom()->license . PHP_EOL?>
- * @version  	SVN: $Id: <?=$table->getFilename()?> <?=date('d-m-Y H:i:s')?> $
+ * @version  	$Id: tbase.tpl 57 2010-11-02 14:22:41Z jacek $
  */
 class <?=$table->getTableBaseName()?> extends <?=$table->getTableBaseExtension() . PHP_EOL?>
 {
@@ -94,7 +99,7 @@ class <?=$table->getTableBaseName()?> extends <?=$table->getTableBaseExtension()
 	 */
 	public function findBy<?=$table->formatFunctionName($key)?>($value)
 	{
-		return $this->findOneBy('<?=$key?>', $value);
+		return $this->findOne(array('<?=$key?> = ?' => $value));
 	}
 <?endforeach;?>
 <?endif?>
