@@ -1,24 +1,28 @@
 <?php
 
-class Generator_Renderer 
+/**
+ * @author Jacek Kobus <kobus.jacek@gmail.com>
+ * @version $Id$
+ */
+class Generator_Renderer
 {
-	const TEMPLATE_MODELS 	= './template/model.tpl';
-	const TEMPLATE_TABLES 	= './template/table.tpl';
-	const TEMPLATE_TBASE 	= './template/tbase.tpl';
-	const TEMPLATE_BASE 	= './template/base.tpl';
+	const TEMPLATE_MODELS 	= './mg/template/model.tpl';
+	const TEMPLATE_TABLES 	= './mg/template/table.tpl';
+	const TEMPLATE_TBASE 	= './mg/template/tbase.tpl';
+	const TEMPLATE_BASE 	= './mg/template/base.tpl';
 	
-	private $_options = array();
-	private $_storage = array();
+	private $config = '';
 	
-	
-	public function __construct(array $options = null)
+	private $storage = array();
+
+	public function __construct(Zend_Config $config)
 	{
-		$this->_options = $options;
+		$this->config = $config;
 	}
 	
 	protected function store($tableName, $type, $renderedTemplate)
 	{
-		$this->_storage[$type][$tableName] = $renderedTemplate;
+		$this->storage[$type][$tableName] = $renderedTemplate;
 	}
 	
 	public function makeDirectory ($dir)
@@ -37,7 +41,9 @@ class Generator_Renderer
 	{
 		// render model
 		$result = $this->render($table, 'model', self::TEMPLATE_MODELS);
-		$this->save($result, $table->getModelFilePath());
+		
+		if(!file_exists($table->getModelFilePath()))
+			$this->save($result, $table->getModelFilePath());
 		Generator::log('Saving '.$table->getModelFilePath().'...');
 		// render base
 		
@@ -74,8 +80,11 @@ class Generator_Renderer
 		if($parents = $table->getParents()){
 			foreach ($parents as $parent => $rel){
 				
-				// remove prefixes
 				$function = $parent;
+				
+				if(isset($children[$function]))
+					$function = 'parent_'.$function;
+				
 				$pattern = '#^'.$table->getName().'_(.*)$#i';
 				if(preg_match($pattern, $function)){
 					$function = preg_replace($pattern, '\\1', $function);
@@ -108,11 +117,13 @@ class Generator_Renderer
 		
 		$result = $this->render($table, 'base', self::TEMPLATE_TABLES);
 		Generator::log('Saving '.$table->getTableFilePath().'...');
-		$this->save($result, $table->getTableFilePath());
+		
+		if(!file_exists($table->getTableFilePath()))
+			$this->save($result, $table->getTableFilePath());
 	}
 	
 	/**
-	 * 
+	 *
 	 * @param Generator_Table $table
 	 * @param string $type model|base|table
 	 * @param string $template file

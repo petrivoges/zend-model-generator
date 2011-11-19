@@ -1,12 +1,32 @@
 <?php
 
+/**
+ * @author Jacek Kobus <kobus.jacek@gmail.com>
+ * @version $Id$
+ */
 class Generator
 {
-	private $_config = null;
-	private $_adapter = null;
+	/**
+	 * @var Zend_Config
+	 */
+	private $config = null;
 	
-	private static $_logger;
+	/**
+	 *
+	 * @var Zend_Db_Adapter_Pdo_Mysql
+	 */
+	private $adapter = null;
 	
+	/**
+	 *
+	 * @var Zend_Log
+	 */
+	private static $logger;
+	
+	/**
+	 * Create new instance of Model Generator
+	 * @param array $config
+	 */
 	public function __construct(array $config)
 	{
 		if(!class_exists('Zend_Loader_Autoloader', false))
@@ -14,7 +34,7 @@ class Generator
 		Zend_Loader_Autoloader::getInstance()
 			->registerNamespace('Generator');
 		self::log('Zend_Autoloader started. Starting Generator.');
-		$this->_config = new Zend_Config($config);
+		$this->config = new Zend_Config($config);
 	}
 	
 	/**
@@ -22,7 +42,7 @@ class Generator
 	 */
 	protected function getConfig()
 	{
-		return $this->_config;
+		return $this->config;
 	}
 	
 	/**
@@ -30,15 +50,20 @@ class Generator
 	 */
 	protected function getAdapter()
 	{
-		if(!$this->_adapter){
+		if(!$this->adapter){
 			self::log('Starting DB adapter ...');
-			$this->_adapter = new Zend_Db_Adapter_Pdo_Mysql($this->getConfig()->db);
-			Zend_Db_Table::setDefaultAdapter($this->_adapter);
+			$this->adapter = new Zend_Db_Adapter_Pdo_Mysql($this->getConfig()->db);
+			Zend_Db_Table::setDefaultAdapter($this->adapter);
 		}
 		self::log('DB adapter started.');
-		return $this->_adapter;
+		return $this->adapter;
 	}
 	
+	/**
+	 * Generate models
+	 * @param array $tables OPTIONAL - names of tables that should be analyzed
+	 * @return void
+	 */
 	public function generate(array $tables = null)
 	{
 		$time = time();
@@ -51,7 +76,7 @@ class Generator
 		}
 		
 		self::log('Starting renderer ...');
-		$view = new Generator_Renderer($this->getConfig()->generator->toArray());
+		$view = new Generator_Renderer($this->getConfig());
 		
 		self::log('All of '.count($tables).' tables will now be analyzed.');
 		$tmp = array();
@@ -67,6 +92,7 @@ class Generator
 
 		self::log('Completed in '.(time()-$time).' seconds.');
 		self::log('Enjoy!');
+		return;
 	}
 	
 	/**
@@ -74,14 +100,14 @@ class Generator
 	 */
 	public static function log($message = null, $priority = Zend_Log::INFO)
 	{
-		if(!self::$_logger){
-			self::$_logger = new Zend_Log(new Zend_Log_Writer_Stream('php://output'));
+		if(!self::$logger){
+			self::$logger = new Zend_Log(new Zend_Log_Writer_Stream('php://output'));
 			self::log('Message logging enabled.');
 		}
 		if($message){
-			self::$_logger->log($message, $priority);
+			self::$logger->log($message, $priority);
 		}
-		return self::$_logger;
+		return self::$logger;
 	}
 }
 

@@ -1,2 +1,6 @@
 @echo off
-php zg.php %*
+echo Make sure to update your config file firts !
+pause
+
+php ./mg/zg.php %*
+cd scripts
