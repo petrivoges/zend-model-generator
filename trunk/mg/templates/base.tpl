@@ -4,7 +4,7 @@
  * Row model template
  *
  * @author Jacek Kobus <kobus.jacek@gmail.com>
- * @version $Id$
+ * @version $Id: base.tpl 73 2010-11-21 18:59:30Z jacek $
  */
 
 /* @var $table Generator_Table */
@@ -33,7 +33,7 @@
  * @author   	<?=$table->custom()->author?> <<?=$table->custom()->email?>>
  * @copyright	<?=$table->custom()->copyright . PHP_EOL?>
  * @license  	<?=$table->custom()->license . PHP_EOL?>
- * @version  	$Id$
+ * @version  	$Id: base.tpl 73 2010-11-21 18:59:30Z jacek $
  */
 class <?=$table->getBaseName()?> extends <?=$table->getBaseExtension() . PHP_EOL?>
 {

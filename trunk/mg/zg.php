@@ -1,8 +1,12 @@
 <?php
 
+/**
+ * @author Jacek Kobus <kobus.jacek@gmail.com>
+ * @version $Id$
+ */
+
 @ob_end_flush();
 date_default_timezone_set('Europe/Warsaw');
-
 set_include_path(implode(PATH_SEPARATOR, array(
 	realpath(getcwd().'/mg/library'),
 	get_include_path()
@@ -10,11 +14,16 @@ set_include_path(implode(PATH_SEPARATOR, array(
 
 require_once 'Generator.php';
 try {
-	$config = include 'config.php';
+	
+	if(!class_exists('Zend_Loader_Autoloader', false))
+		require_once 'Zend/Loader/Autoloader.php';
+		
+	Zend_Loader_Autoloader::getInstance()->registerNamespace('Generator');
+	$config = new Zend_Config_Ini('config.ini');
 	$zg = new Generator($config);
 	$zg->generate();
+	
 }catch (Exception $e){
-
 	echo 'Exception cought!';
 	echo $e->getMessage();
 	echo $e->getFile().':'.$e->getLine();

@@ -4,7 +4,7 @@
  * Model Base Table template
  * 
  * @author Jacek Kobus <kobus.jacek@gmail.com>
- * @version $Id: table.tpl 57 2010-11-02 14:22:41Z jacek $
+ * @version $Id$
  */
 
 /* @var $table Generator_Table */
@@ -24,7 +24,7 @@
  * @author   	<?=$table->custom()->author?> <<?=$table->custom()->email?>>
  * @copyright	<?=$table->custom()->copyright . PHP_EOL?>
  * @license  	<?=$table->custom()->license . PHP_EOL?>
- * @version  	$Id: table.tpl 57 2010-11-02 14:22:41Z jacek $
+ * @version  	$Id$
  */
 class <?=$table->getTableName()?> extends <?=$table->getTableBaseName() . PHP_EOL?>
 {
