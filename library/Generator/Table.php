@@ -2,40 +2,40 @@
 
 /**
  * This is a model
- * 
+ *
  * @author Jacek Kobus <jacekkobus.com>
  */
 class Generator_Table
 {
-	private $_table = null;
-	private $_options = null;
-	private $_analyzer = null;
-	private $info = null;
-	private $_dependencyChecker = null;
-	
-	public function __construct($table, $options)
-	{
-		if(is_string($table)){
-			$table = new Zend_Db_Table($table);
-		}
-		$this->_options = $options;
-		$this->_table = $table;
-		$this->_analyzer = Generator_Analyzer::factory($table);
-		$this->info = $this->getAnalyzer()->parse();
-		$this->_dependencyChecker = $this->getAnalyzer()->getDependencyChecker();
-	}
-	
-	public function getOptions()
-	{
-		return $this->_options;
-	}
+	/**
+	 * @var Zend_Db_Table
+	 */
+	private $table;
 	
 	/**
-	 * @return Generator_Analyzer
+	 * @var Generator_Container
 	 */
-	protected function getAnalyzer()
+	private $container;
+	
+	/**
+	 * @var array
+	 */
+	private $info;
+	
+	/**
+	 * Create new table instance
+	 * @param string $table
+	 * @param Generator_Container $container
+	 */
+	public function __construct($table, Generator_Container $container)
 	{
-		return $this->_analyzer;
+		if(is_string($table)){
+			$this->table = new Zend_Db_Table($table);
+		}else
+			throw new Generator_Exception('Table parameter must be a string.');
+		
+		$this->container = $container;
+		$this->info = $this->container->getAnalyzer($this->table)->analyze();
 	}
 	
 	/**
@@ -43,22 +43,31 @@ class Generator_Table
 	 */
 	protected function getTable()
 	{
-		return $this->_table;
+		return $this->table;
 	}
 	
+	/**
+	 * @return array
+	 */
 	public function getParents()
 	{
-		return $this->dependency()->getParentsOf($this->getName());
+		return $this->container->getDependencyChecker()->getParentsOf($this->getName());
 	}
 	
+	/**
+	 * @return array
+	 */
 	public function getChildren()
 	{
-		return $this->dependency()->getChildrenOf($this->getName());
+		return $this->container->getDependencyChecker()->getChildrenOf($this->getName());
 	}
 	
+	/**
+	 * @return array
+	 */
 	public function getDependentTables()
 	{
-		return $this->dependency()->getDependenciesFor($this->getName());
+		return $this->container->getDependencyChecker()->getDependenciesFor($this->getName());
 	}
 	
 	/**
@@ -70,78 +79,105 @@ class Generator_Table
 		return $this->info['name'];
 	}
 	
+	/**
+	 * Get filename for new model
+	 * @return string
+	 */
 	public function getFilename()
 	{
 		return $this->formatFilename($this->getName());
 	}
-
 	
-	public function getModelName($name = null)
+	/**
+	 * Get model name
+	 * @param string $tableName OPTIONAL
+	 * @return string
+	 */
+	public function getModelName($tableName = null)
 	{
-		if(!$name){$name=$this->getName();}
-		return $this->formatClassName($name, 'model');
+		if(!$tableName)
+			$tableName = $this->getName();
+		return $this->formatClassName($tableName, 'model');
 	}
 	
+	/**
+	 * Get table model name (Model_DbTable_{name})
+	 * @param string $name
+	 * @return string
+	 */
 	public function getTableName($name = null)
 	{
-		if(!$name){$name=$this->getName();}
+		if(!$name)
+			$name = $this->getName();
 		return $this->formatClassName($name, 'table');
 	}
 	
-	
+	/**
+	 * Get table model base name
+	 * @param string $name
+	 * @return string
+	 */
 	public function getTableBaseName($name = null)
 	{
-		if(!$name){$name=$this->getName();}
+		if(!$name)
+			$name = $this->getName();
 		return $this->formatClassName($name, 'tbase');
 	}
 	
-	
-	
+	/**
+	 * Get model base name
+	 * @param string $name
+	 * @return string
+	 */
 	public function getBaseName($name = null)
 	{
-		if(!$name){$name=$this->getName();}
+		if(!$name)
+			$name = $this->getName();
 		return $this->formatClassName($name, 'base');
 	}
 	
+	/**
+	 * Get name of a class extending base model
+	 * @return string
+	 */
 	public function getBaseExtension()
 	{
-		return $this->getOptions()->pattern->base->extends;
+		return $this->container->getConfig()->pattern->base->extends;
 	}
 	
-	public function getTableExtension()
-	{
-		return $this->getOptions()->pattern->table->extends;
-	}
-	
+	/**
+	 * Get name of a class extending table model base
+	 * @return string
+	 */
 	public function getTableBaseExtension()
 	{
-		return $this->getOptions()->pattern->tbase->extends;
+		return $this->container->getConfig()->pattern->tbase->extends;
 	}
 	
 	public function getModelFilePath()
 	{
-		$dir = $this->getOptions()->dir->models;
+		$dir = $this->container->getConfig()->dir->models;
 		if(!is_dir($dir)){ mkdir($dir, null, true); }
 		return $dir.DIRECTORY_SEPARATOR.$this->getFilename();
 	}
 	
 	public function getBaseFilePath()
 	{
-		$dir = $this->getOptions()->dir->base;
+		$dir = $this->container->getConfig()->dir->base;
 		if(!is_dir($dir)){ mkdir($dir, null, true); }
 		return $dir.DIRECTORY_SEPARATOR.$this->getFilename();
 	}
 	
 	public function getTableFilePath()
 	{
-		$dir = $this->getOptions()->dir->tables;
+		$dir = $this->container->getConfig()->dir->tables;
 		if(!is_dir($dir)){ mkdir($dir, null, true); }
 		return $dir.DIRECTORY_SEPARATOR.$this->getFilename();
 	}
 	
 	public function getTableBaseFilePath()
 	{
-		$dir = $this->getOptions()->dir->btables;
+		$dir = $this->container->getConfig()->dir->btables;
 		if(!is_dir($dir)){ mkdir($dir, null, true); }
 		return $dir.DIRECTORY_SEPARATOR.$this->getFilename();
 	}
@@ -154,7 +190,6 @@ class Generator_Table
 		return $this->info['metadata'];
 	}
 	
-	
 	/**
 	 * @param array $column
 	 */
@@ -162,7 +197,6 @@ class Generator_Table
 	{
 		return $this->info['metadata'][$column];
 	}
-	
 	
 	/**
 	 * @return bool
@@ -175,7 +209,6 @@ class Generator_Table
 		return false;
 	}
 	
-	
 	/**
 	 * @return array
 	 */
@@ -187,7 +220,6 @@ class Generator_Table
 		return null;
 	}
 	
-	
 	/**
 	 * @return array
 	 */
@@ -196,16 +228,26 @@ class Generator_Table
 		return $this->info['cols'];
 	}
 	
+	/**
+	 * Get all avilable properties
+	 * @return array
+	 */
 	public function getProperties()
 	{
 		$tmp = array();
 		foreach ($this->getColumns() as $id => $name){
+			$tmp[$name]['name'] = $name;
 			$tmp[$name]['type'] = $this->getTypeFor($name);
 			$tmp[$name]['desc'] = $this->getMysqlDatatype($name);
 		}
 		return $tmp;
 	}
 	
+	/**
+	 * Get mysql datatype for specified key
+	 * @param string $key
+	 * @return string
+	 */
 	public function getMysqlDatatype($key)
 	{
 		$meta = $this->getMetadata();
@@ -223,7 +265,6 @@ class Generator_Table
 		return false;
 	}
 	
-	
 	/**
 	 * @return bool
 	 */
@@ -234,7 +275,6 @@ class Generator_Table
 		}
 		return false;
 	}
-	
 	
 	/**
 	 * @return array|null
@@ -247,16 +287,17 @@ class Generator_Table
 		return null;
 	}
 	
-	
 	/**
+	 * Get all primary keys
 	 * @return array
 	 */
 	public function getPrimary()
 	{
-		return $this->info['primary'];
+		return array_merge($this->info['primary'], array());
 	}
 	
 	/**
+	 * Get all primary keys in array notation
 	 * @return string
 	 */
 	public function getPrimaryAsString()
@@ -265,10 +306,14 @@ class Generator_Table
 		return 'array(\''.implode('\', \'', $primary).'\')';
 	}
 	
+	/**
+	 * Get all dependants
+	 * @return string
+	 */
 	public function getDependantTables()
 	{
 		$tmp = array();
-		$tables = $this->dependency()->getChildrenOf($this->getName());
+		$tables = $this->container->getDependencyChecker()->getChildrenOf($this->getName());
 		if(is_array($tables)){
 			foreach ($tables as $name => $smth){
 				$tmp[] = $this->getTableName($name);
@@ -279,6 +324,10 @@ class Generator_Table
 		}
 	}
 	
+	/**
+	 * Get all dependants in array notation
+	 * @return string
+	 */
 	public function getDependantAsString()
 	{
 		$tables = $this->getDependantTables();
@@ -289,6 +338,7 @@ class Generator_Table
 	}
 	
 	/**
+	 * Get column type
 	 * @return string|null
 	 */
 	public function getTypeFor($column)
@@ -299,18 +349,14 @@ class Generator_Table
 		return null;
 	}
 	
-	
-	public function custom()
+	public function getCustomVar()
 	{
-		return $this->getOptions()->custom;
+		
 	}
 	
-	/**
-	 * @return Generator_Dependencies
-	 */
-	public function dependency()
+	public function getCustomVars()
 	{
-		return $this->_dependencyChecker;
+
 	}
 	
 	/**
@@ -323,16 +369,16 @@ class Generator_Table
 	{
 		switch ($type){
 			case 'model':
-				$pattern = $this->getOptions()->pattern->model->classname;
+				$pattern = $this->container->getConfig()->pattern->model->classname;
 				break;
 			case 'table':
-				$pattern = $this->getOptions()->pattern->table->classname;
+				$pattern = $this->container->getConfig()->pattern->table->classname;
 				break;
 			case 'base':
-				$pattern = $this->getOptions()->pattern->base->classname;
+				$pattern = $this->container->getConfig()->pattern->base->classname;
 				break;
 			case 'tbase':
-				$pattern = $this->getOptions()->pattern->tbase->classname;
+				$pattern = $this->container->getConfig()->pattern->tbase->classname;
 				break;
 			
 			default:
@@ -356,11 +402,21 @@ class Generator_Table
 		return $string;
 	}
 	
+	/**
+	 * Format method name
+	 * @param string $name
+	 * @return string
+	 */
 	public function formatFunctionName($name)
 	{
 		return ucfirst($this->formatUnderscoreToCamel($name));
 	}
 	
+	/**
+	 * Format filename
+	 * @param string $name
+	 * @return string
+	 */
 	protected function formatFilename($name)
 	{
 		return $this->formatUnderscoreToCamel($name).'.php';

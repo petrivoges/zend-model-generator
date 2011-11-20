@@ -5,6 +5,8 @@
  * @version $Id$
  */
 
+header('Content-type: text/plain; charset=utf-8');
+
 @ob_end_flush();
 chdir('..');
 date_default_timezone_set('Europe/Warsaw');

@@ -32,16 +32,17 @@ class Generator
 		$tables = $this->container->getAdapter()->listTables();
 		$renderer = $this->container->getRenderer();
 
-		
-		var_dump($tables);
-		
 		$tmp = array();
 		foreach ($tables as $id => $name){
-			$tmp[$name] = new Generator_Table($name, $this->getConfig()->generator);
+			$tmp[$name] = $table = new Generator_Table($name, $this->container);
+			
+			$template = new Generator_Template($this->container);
+			$template->make($table);
+			
 		}
 		
 		
-		
+		die('ok');
 		/*foreach ($tmp as $name => $model){
 			self::log('Rendering '.$name.'.');
 			$renderer->make($model);

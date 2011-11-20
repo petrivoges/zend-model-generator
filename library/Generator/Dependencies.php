@@ -7,19 +7,7 @@
  */
 class Generator_Dependencies
 {
-	private static $_instance;
-	private $_dependencies = array();
-	
-	/**
-	 * @return Generator_Dependencies
-	 */
-	public function getInstance()
-	{
-		if(!self::$_instance){
-			self::$_instance = new self();
-		}
-		return self::$_instance;
-	}
+	private static $dependencies = array();
 
 	/**
 	 * Set current $table as a child for $fTable
@@ -46,10 +34,11 @@ class Generator_Dependencies
 	 */
 	protected function addChild($table, $col, $childTable, $childCol, $childKey)
 	{
-		$this->_dependencies[$table]['children'][$childTable] = array(
+		self::$dependencies[$table]['children'][$childTable] = array(
 			'col' => $col,
 			'childKey' => $childKey,
 			'childCol' => $childCol,
+			'child' => $childTable,
 		);
 	}
 	
@@ -63,7 +52,7 @@ class Generator_Dependencies
 	 */
 	protected function addParent($table, $col, $key, $parentTable, $parentCol)
 	{
-		$this->_dependencies[$table]['parents'][$parentTable] = array(
+		self::$dependencies[$table]['parents'][$parentTable] = array(
 			'parent' => $parentTable,
 			'key' => $key,
 			'col' => $col,
@@ -78,10 +67,10 @@ class Generator_Dependencies
 	 */
 	public function getChildrenOf($tableName)
 	{
-		if(isset($this->_dependencies[$tableName]['children'])){
-			return $this->_dependencies[$tableName]['children'];
+		if(isset(self::$dependencies[$tableName]['children'])){
+			return self::$dependencies[$tableName]['children'];
 		}else{
-			return null;
+			return array();
 		}
 	}
 	
@@ -92,10 +81,10 @@ class Generator_Dependencies
 	 */
 	public function getParentsOf($tableName)
 	{
-		if(isset($this->_dependencies[$tableName]['parents'])){
-			return $this->_dependencies[$tableName]['parents'];
+		if(isset(self::$dependencies[$tableName]['parents'])){
+			return self::$dependencies[$tableName]['parents'];
 		}else{
-			return null;
+			return array();
 		}
 	}
 	
@@ -106,8 +95,8 @@ class Generator_Dependencies
 	 */
 	public function getDependenciesFor($tableName)
 	{
-		if(!empty($this->_dependencies[$tableName])){
-			return $this->_dependencies[$tableName];
+		if(!empty(self::$dependencies[$tableName])){
+			return self::$dependencies[$tableName];
 		}
 		return null;
 	}
@@ -118,6 +107,6 @@ class Generator_Dependencies
 	 */
 	public function toArray()
 	{
-		return $this->_dependencies;
+		return self::$dependencies;
 	}
 }

@@ -1,0 +1,52 @@
+<!-- @version $Id: README.txt 15 2011-11-19 17:25:01Z kobus.jacek@gmail.com $ -->
+<h1>Jack's Model Generator</h1>
+
+<em>Thank you for using my model generator. I hope it will save you hours of work, as it did for me - Jack.</em>
+
+<h2>Requirements</h2>
+
+<ul>
+	<li>PHP 5</li>
+	<li>Zend Framework</li>
+	<li>MySql</li>
+</ul>
+
+<h2>How it works ?</h2>
+
+<p>ModelGenerator analyzes your database looking for relations and keys - primary and unique.
+Remember that each table MUST have PRIMARY key defined. Generator will not work without it. It's a good practice so
+remember to add at least "auto_increment" column in your tables.
+</p>
+
+<h2>How models work ?</h2>
+
+<p>Generator will create 4 files for each table. An empty class - model, base model, table model and table base.
+The first one - model, is a file where you can write your own code. It will not be modified nor removed
+even if you will run Generator more than once.
+<br>
+<br>
+Base model - this file contains automatically generated code, along with some documentation
+helping you php editor in auto-completing your code. There are also very helpfull methods like 
+find*Parent*, find*childTable*, create*Child*, delete*child*.
+
+Remember that you are NOT allowed to edit this file, as it will change as soon as you will 
+try to re-generate your code. The code will be replaced and all changes will be lost.
+<br>
+<br>
+
+Table model is very similar to model. It's a file where you can put some of your hand-written code.
+<br>
+<br>
+
+Table base was made for the same purpose as the base model - it's auto-generated and all 
+changes made to this file will be lost as soon as you'll lunch the Generator.
+
+</p>
+
+<h2>How to use models in your project ?</h2>
+
+... tbc
+
+<h2>Additional classes - "Website_"</h2>
+
+... tbc

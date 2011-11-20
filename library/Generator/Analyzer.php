@@ -7,34 +7,47 @@
  */
 class Generator_Analyzer
 {
-	private $_table = null;
+	/**
+	 * @var Zend_Db_Table_Abstract
+	 */
+	private $table;
 	
-	public function __construct(Zend_Db_Table_Abstract $table)
+	/**
+	 * @var Generator_Container
+	 */
+	private $container;
+	
+	/**
+	 * Create new analyzer
+	 * @param Zend_Db_Table_Abstract $table
+	 */
+	public function __construct(Zend_Db_Table_Abstract $table, Generator_Container $container)
 	{
-		$this->_table = $table;
+		$this->table = $table;
+		$this->container = $container;
 	}
 	
 	/**
 	 * @param Zend_Db_Table_Abstract $table
 	 * @return Generator_Analyzer
 	 */
-	public function factory(Zend_Db_Table_Abstract $table)
+	public static function factory(Zend_Db_Table_Abstract $table)
 	{
 		return new self($table);
 	}
 	
 	/**
-	 * @return Zend_Db_Table
+	 * @return Zend_Db_Table_Abstract
 	 */
 	protected function getTable()
 	{
-		return $this->_table;
+		return $this->table;
 	}
 	
 	/**
 	 * Start analyzer
 	 */
-	public function parse()
+	public function analyze()
 	{
 		$table = $this->getTable();
 		
@@ -97,7 +110,7 @@ class Generator_Analyzer
 	 */
 	public function getDependencyChecker()
 	{
-		return Generator_Dependencies::getInstance();
+		return $this->container->getDependencyChecker();
 	}
 	
 	/**
