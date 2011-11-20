@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Analyze tables and dependencies
+ * @author Jacek Kobus <kobus.jacek@gmail.com>
+ * @version $Id$
+ */
 class Generator_Analyzer
 {
 	private $_table = null;
@@ -26,6 +31,9 @@ class Generator_Analyzer
 		return $this->_table;
 	}
 	
+	/**
+	 * Start analyzer
+	 */
 	public function parse()
 	{
 		$table = $this->getTable();
@@ -33,10 +41,10 @@ class Generator_Analyzer
 		$info = $table->info();
 		$info['uniques'] = array();
 		unset(
-			$info['sequence'], 
-			//$info['cols'], 
-			$info['schema'], 
-			$info['rowClass'], 
+			$info['sequence'],
+			//$info['cols'],
+			$info['schema'],
+			$info['rowClass'],
 			$info['rowsetClass'],
 			$info['dependentTables'],
 			$info['referenceMap']
@@ -46,7 +54,7 @@ class Generator_Analyzer
 		
 		foreach ($info['metadata'] as $property => $details){
 			// match php types
-			$info['phptypes'][$property] = 
+			$info['phptypes'][$property] =
 				$this->convertMysqlTypeToPhp($details['DATA_TYPE']);
 				
 			// find uniques
@@ -66,17 +74,17 @@ class Generator_Analyzer
 			preg_match('/^\s*CONSTRAINT `(\w+)` FOREIGN KEY \(`(\w+)`\) REFERENCES `(\w+)` \(`(\w+)`\)/',$line, $tblinfo);
 			if (sizeof($tblinfo) > 0) {
 				$keys[] = $tmp = array(
-					'key' 		=> $tblinfo[1], 
-					'column' 	=> $tblinfo[2], 
-					'fk_table' 	=> $tblinfo[3], 
+					'key' 		=> $tblinfo[1],
+					'column' 	=> $tblinfo[2],
+					'fk_table' 	=> $tblinfo[3],
 					'fk_column' => $tblinfo[4]
 				);
 				
 				$this->getDependencyChecker()->isChild(
-					$info['name'], 
-					$tmp['column'], 
-					$tmp['key'], 
-					$tmp['fk_table'], 
+					$info['name'],
+					$tmp['column'],
+					$tmp['key'],
+					$tmp['fk_table'],
 					$tmp['fk_column']);
 			}
 		}
@@ -109,7 +117,6 @@ class Generator_Analyzer
 		if(preg_match('#^(.*)float(.*)$#', $mysqlType)){
 			$type = 'float';
 		}
-		
 		return $type;
 	}
 	
