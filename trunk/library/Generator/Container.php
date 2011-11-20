@@ -64,6 +64,23 @@ class Generator_Container
 	}
 	
 	/**
+	 * @return Generator_Dependencies
+	 */
+	public function getDependencyChecker()
+	{
+		return new Generator_Dependencies();
+	}
+	
+	/**
+	 * @param Zend_Db_Table_Abstract $table
+	 * @return Generator_Analyzer
+	 */
+	public function getAnalyzer(Zend_Db_Table_Abstract $table)
+	{
+		return new Generator_Analyzer($table, $this);
+	}
+	
+	/**
 	 * @return Zend_Log
 	 */
 	public function log($message = null, $priority = Zend_Log::INFO)
