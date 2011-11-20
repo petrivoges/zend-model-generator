@@ -1,10 +1,18 @@
 <?php
 
+/**
+ * Dependency checker
+ * @author Jacek Kobus <kobus.jacek@gmail.com>
+ * @version $Id$
+ */
 class Generator_Dependencies
 {
 	private static $_instance;
 	private $_dependencies = array();
 	
+	/**
+	 * @return Generator_Dependencies
+	 */
 	public function getInstance()
 	{
 		if(!self::$_instance){
@@ -15,7 +23,7 @@ class Generator_Dependencies
 
 	/**
 	 * Set current $table as a child for $fTable
-	 * 
+	 *
 	 * @param string $table Table
 	 * @param string $col Table key
 	 * @param string $keyName	Table fkey name

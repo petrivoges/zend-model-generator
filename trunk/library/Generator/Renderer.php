@@ -11,10 +11,17 @@ class Generator_Renderer
 	const TEMPLATE_TBASE 	= './mg/template/tbase.tpl';
 	const TEMPLATE_BASE 	= './mg/template/base.tpl';
 	
-	private $config = '';
+	/**
+	 * @var Zend_Config
+	 */
+	private $config;
 	
 	private $storage = array();
 
+	/**
+	 * Create new instance of renderer
+	 * @param Zend_Config $config
+	 */
 	public function __construct(Zend_Config $config)
 	{
 		$this->config = $config;
