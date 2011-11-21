@@ -16,37 +16,6 @@ class Generator_Template
 		$this->container = $container;
 	}
 	
-	public function getRowBaseClass()
-	{
-		
-	}
-	
-	public function getRowClass()
-	{
-		
-	}
-	
-	protected function createMethod($name, $body)
-	{
-		$method = new Zend_CodeGenerator_Php_Method();
-		$method->setName($name);
-		return $method;
-	}
-	
-	protected function createClass($name)
-	{
-		$class = new Zend_CodeGenerator_Php_Class();
-		$class->setName($name);
-		return $class;
-	}
-	
-	protected function createFile(Zend_CodeGenerator_Php_Class $class)
-	{
-		$file = new Zend_CodeGenerator_Php_File();
-		if($class)
-			$file->setClass($class);
-	}
-	
 	public function make(Generator_Table $table)
 	{
 		$templates = array(
@@ -88,6 +57,8 @@ class Generator_Template
 		foreach ($table->getProperties() as $property)
 			$tmp[] = array('name' => 'property', 'description' => $property['type'] . ' $'.$property['name'].' '.$property['desc']);
 		
+		$tmp[] = array('name' => 'method', 'description' => $table->getTableName() . ' getTable()');
+			
 		// create methods
 		foreach ($table->getChildren() as $child){
 			$methodName = $child['child'];
@@ -243,10 +214,11 @@ class Generator_Template
 			'classes' => array($modelBase),
 		));
 		
+		var_dump($modelBaseFile->generate());
+		
 		////////////////////////////////////////////
 		// create table
 		////////////////////////////////////////////
-		
 		
 		$modelTable = new Zend_CodeGenerator_Php_Class(array(
 			'name' => $table->getTableName(),
@@ -266,6 +238,38 @@ class Generator_Template
 		// create table base
 		////////////////////////////////////////////
 		
+		
+		$methods = array();
+		$tableReferences = array();
+		
+		foreach ($table->getUniqueKeys() as $key){
+
+			$methods[] = new Zend_CodeGenerator_Php_Method(array(
+				'name' => 'findBy'.$table->formatFunctionName($key),
+				'docblock' => new Zend_CodeGenerator_Php_Docblock(array(
+					//'shortDescription' => 'Find row by '.$table->getModelName($parent['parent']),
+					'tags' => array(
+						new Zend_CodeGenerator_Php_Docblock_Tag_Param(array(
+							'paramName' => 'value', 'dataType' => 'mix',
+						)),
+						array('name' => 'return', 'description' => 'Zend_Db_Table_Row'),
+					),
+				)),
+				'parameters' => array(
+					array('name' => 'value'),
+				),
+				'body' => 'return $this->findOne(array(\''.$key.' = ?\' => $value));',
+			));
+		}
+		
+		foreach ($table->getParents() as $parent){
+			$tableReferences[$parent['key']] = array(
+				'columns' => $parent['col'],
+				'refTableClass' => $table->getTableName($parent['parent']),
+				'refColumns' => $parent['parentCol'],
+			);
+		}
+		
 		$modelTableBase = new Zend_CodeGenerator_Php_Class(array(
 			'name' => $table->getTableBaseName(),
 			'docblock' => new Zend_CodeGenerator_Php_Docblock(array(
@@ -279,8 +283,10 @@ class Generator_Template
 				array('name' => '_name', 'visiblity' => 'protected', 'defaultValue' => $table->getName()),
 				array('name' => '_primary', 'visiblity' => 'protected', 'defaultValue' => $table->getPrimary()),
 				array('name' => '_rowClass', 'visiblity' => 'protected', 'defaultValue' => $table->getModelName()),
+				array('name' => '_referenceMap', 'visiblity' => 'protected', 'defaultValue' => $tableReferences),
+				array('name' => '_dependantTables', 'visiblity' => 'protected', 'defaultValue' => $table->getDependantTables()),
 			),
-			//'methods' => $methods,
+			'methods' => $methods,
 		));
 		
 		//$properties[] =
@@ -300,7 +306,7 @@ class Generator_Template
 		
 		
 		
-		var_dump($modelTableBaseFile->generate());
+		//var_dump($modelTableBaseFile->generate());
 		
 		
 	}
