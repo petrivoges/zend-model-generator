@@ -47,6 +47,10 @@ class Generator_Template
 			'classes' => array($modelClass),
 		));
 		
+		// save
+		if(!file_exists($table->getModelFilePath()))
+			file_put_contents($table->getModelFilePath(), $modelFile->generate());
+				
 		////////////////////////////////////////////
 		// create model base
 		////////////////////////////////////////////
@@ -64,7 +68,7 @@ class Generator_Template
 			$methodName = $child['child'];
 			$pattern = '#^'.$table->getName().'_(.*)$#i';
 			if(preg_match($pattern, $methodName)){
-				$function = preg_replace($pattern, '\\1', $methodName);
+				$methodName = preg_replace($pattern, '\\1', $methodName);
 			}
 			$methodName = $table->formatFunctionName($methodName);
 			
@@ -155,12 +159,14 @@ class Generator_Template
 			
 			$children = $table->getChildren();
 			
-			if(isset($children[$methodName]))
-					$function = 'parent_'.$methodName;
+			// if there is a child table with the same name add "parent" prefix
+			if(isset($children[$methodName])){
+					$methodName = 'parent_'.$methodName;
+			}
 			
 			$pattern = '#^'.$table->getName().'_(.*)$#i';
 			if(preg_match($pattern, $methodName)){
-				$function = preg_replace($pattern, '\\1', $function);
+				$methodName = preg_replace($pattern, '\\1', $methodName);
 			}
 			
 			$methodName = $table->formatFunctionName($methodName);
@@ -214,7 +220,8 @@ class Generator_Template
 			'classes' => array($modelBase),
 		));
 		
-		var_dump($modelBaseFile->generate());
+		// save
+		file_put_contents($table->getBaseFilePath(), $modelBaseFile->generate());
 		
 		////////////////////////////////////////////
 		// create table
@@ -233,6 +240,10 @@ class Generator_Template
 		$modelTableFile = new Zend_CodeGenerator_Php_File(array(
 			'classes' => array($modelTable),
 		));
+		
+		// save
+		if(!file_exists($table->getTableFilePath()))
+			file_put_contents($table->getTableFilePath(), $modelTableFile->generate());
 		
 		////////////////////////////////////////////
 		// create table base
@@ -288,26 +299,12 @@ class Generator_Template
 			),
 			'methods' => $methods,
 		));
-		
-		//$properties[] =
-		/*$properties[] = new Zend_CodeGenerator_Php_Property(array(
-			'name' => '_primary',
-			'defaultValue' => new Zend_CodeGenerator_Php_Property_DefaultValue(array(
-				'type' => Zend_CodeGenerator_Php_Property_DefaultValue::TYPE_ARRAY,
-				'value' => array(1,2,3)
-			)),
-		));
-		
-		$modelTableBase->setProperties($properties);*/
-		
 		$modelTableBaseFile = new Zend_CodeGenerator_Php_File(array(
 			'classes' => array($modelTableBase),
 		));
 		
-		
-		
-		//var_dump($modelTableBaseFile->generate());
-		
-		
+		// save
+		file_put_contents($table->getTableBaseFilePath(), $modelTableBaseFile->generate());
+		return;
 	}
 }

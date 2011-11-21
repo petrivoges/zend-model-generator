@@ -154,31 +154,42 @@ class Generator_Table
 		return $this->container->getConfig()->pattern->tbase->extends;
 	}
 	
+	/**
+	 * Get destination for model
+	 */
 	public function getModelFilePath()
 	{
-		$dir = $this->container->getConfig()->dir->models;
-		if(!is_dir($dir)){ mkdir($dir, null, true); }
+		$dir = $this->container->getConfig()->destination->model;
+		if(!is_dir($dir)){
+			mkdir($dir, null, true);
+		}
 		return $dir.DIRECTORY_SEPARATOR.$this->getFilename();
 	}
 	
 	public function getBaseFilePath()
 	{
-		$dir = $this->container->getConfig()->dir->base;
-		if(!is_dir($dir)){ mkdir($dir, null, true); }
+		$dir = $this->container->getConfig()->destination->base;
+		if(!is_dir($dir)){
+			mkdir($dir, null, true);
+		}
 		return $dir.DIRECTORY_SEPARATOR.$this->getFilename();
 	}
 	
 	public function getTableFilePath()
 	{
-		$dir = $this->container->getConfig()->dir->tables;
-		if(!is_dir($dir)){ mkdir($dir, null, true); }
+		$dir = $this->container->getConfig()->destination->table;
+		if(!is_dir($dir)){
+			mkdir($dir, null, true);
+		}
 		return $dir.DIRECTORY_SEPARATOR.$this->getFilename();
 	}
 	
 	public function getTableBaseFilePath()
 	{
-		$dir = $this->container->getConfig()->dir->btables;
-		if(!is_dir($dir)){ mkdir($dir, null, true); }
+		$dir = $this->container->getConfig()->destination->tbase;
+		if(!is_dir($dir)){
+			mkdir($dir, null, true);
+		}
 		return $dir.DIRECTORY_SEPARATOR.$this->getFilename();
 	}
 	

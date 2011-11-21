@@ -21,6 +21,27 @@ class Generator
 	}
 	
 	/**
+	 * @return Generator_Container
+	 */
+	public function getContainer()
+	{
+		return $this->container;
+	}
+	
+	/**
+	 * Log message
+	 * @param string $message
+	 * @param int $priority
+	 * @param mix $mixed
+	 * @return Generator
+	 */
+	public function log($message, $priority = Zend_Log::INFO, $mixed = null)
+	{
+		$this->getContainer()->getLogger()->log($message, $priority, $mixed);
+		return $this;
+	}
+	
+	/**
 	 * Generate models
 	 * @param array $tables OPTIONAL - names of tables that should be analyzed
 	 * @return void
@@ -35,26 +56,9 @@ class Generator
 		$tmp = array();
 		foreach ($tables as $id => $name){
 			$tmp[$name] = $table = new Generator_Table($name, $this->container);
-			
 			$template = new Generator_Template($this->container);
 			$template->make($table);
-			
 		}
-		
-		
-		die('ok');
-		/*foreach ($tmp as $name => $model){
-			self::log('Rendering '.$name.'.');
-			$renderer->make($model);
-		}*/
-
-		return;
+		return true;
 	}
 }
-
-
-
-
-
-
-
