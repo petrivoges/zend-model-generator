@@ -21,7 +21,7 @@ class Generator_Container
 	 *
 	 * @var Zend_Log
 	 */
-	private static $logger;
+	private $logger;
 	
 	/**
 	 * @param Zend_Config $config
@@ -83,16 +83,12 @@ class Generator_Container
 	/**
 	 * @return Zend_Log
 	 */
-	public function log($message = null, $priority = Zend_Log::INFO)
+	public function getLogger()
 	{
-		if(!self::$logger){
-			self::$logger = new Zend_Log(new Zend_Log_Writer_Stream('php://output'));
-			self::log('Message logging enabled.');
+		if(!$this->logger){
+			$this->logger = new Zend_Log(new Zend_Log_Writer_Stream('php://output'));
 		}
-		if($message){
-			self::$logger->log($message, $priority);
-		}
-		return self::$logger;
+		return $this->logger;
 	}
 }
 
