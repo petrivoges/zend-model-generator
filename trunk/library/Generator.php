@@ -50,15 +50,45 @@ class Generator
 	{
 		$time = time();
 		
+		$this->log('Listing tables ...');
 		$tables = $this->container->getAdapter()->listTables();
+		$this->log(count($tables) . ' tables total. Initializing renderer ...');
 		$renderer = $this->container->getRenderer();
 
 		$tmp = array();
 		foreach ($tables as $id => $name){
-			$tmp[$name] = $table = new Generator_Table($name, $this->container);
-			$template = new Generator_Template($this->container);
-			$template->make($table);
+			$this->log('Analyzing table: '.$name);
+			
+			try {
+				$tmp[$name] = $table = new Generator_Table($name, $this->container);
+			}catch(Exception $e){
+				
+				$this->log('Error cought: '.$e->getMessage());
+				
+				if($this->getContainer()->getConfig()->options->ignoreErrors == true){
+					$this->log('Table: "'.$name.'" will be skipped. Some dependencies in generated files may not work properly.');
+				}else{
+					$this->log('No files were changed. Script will exit now.');
+					exit;
+				}
+			}
 		}
+		
+		foreach ($tmp as $name => $table){
+			$this->log('Rendering: '.$name);
+			try {
+				$renderer->make($table);
+			}catch (Exception $e){
+				$this->log('Error cought: '.$e->getMessage());
+				if($this->getContainer()->getConfig()->options->ignoreErrors == true){
+					$this->log('Rendering process for table: "'.$name.'" will be skipped.');
+				}else{
+					$this->log('Script will exit now.');
+					exit;
+				}
+			}
+		}
+		
 		return true;
 	}
 }

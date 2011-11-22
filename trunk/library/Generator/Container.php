@@ -12,16 +12,18 @@ class Generator_Container
 	private $config = null;
 	
 	/**
-	 *
 	 * @var Zend_Db_Adapter_Pdo_Mysql
 	 */
 	private $adapter = null;
 	
 	/**
-	 *
 	 * @var Zend_Log
 	 */
 	private $logger;
+	
+	private $dependencyChecker = null;
+	
+	private $analyzer = null;
 	
 	/**
 	 * @param Zend_Config $config
@@ -55,7 +57,7 @@ class Generator_Container
 	
 	public function getRenderer()
 	{
-		
+		return new Generator_Template($this);
 	}
 	
 	public function getTemplate()
@@ -68,16 +70,20 @@ class Generator_Container
 	 */
 	public function getDependencyChecker()
 	{
-		return new Generator_Dependencies();
+		if(!$this->dependencyChecker)
+			$this->dependencyChecker = new Generator_Dependencies();
+		return $this->dependencyChecker;
 	}
 	
 	/**
 	 * @param Zend_Db_Table_Abstract $table
 	 * @return Generator_Analyzer
 	 */
-	public function getAnalyzer(Zend_Db_Table_Abstract $table)
+	public function getAnalyzer()
 	{
-		return new Generator_Analyzer($table, $this);
+		if(!$this->analyzer)
+			$this->analyzer = new Generator_Analyzer($this);
+		return $this->analyzer;
 	}
 	
 	/**
@@ -89,6 +95,15 @@ class Generator_Container
 			$this->logger = new Zend_Log(new Zend_Log_Writer_Stream('php://output'));
 		}
 		return $this->logger;
+	}
+	
+	/**
+	 * @return int
+	 */
+	public function getMicrotime()
+	{
+		list($usec, $sec) = explode(" ",microtime());
+		return ((float)$usec + (float)$sec);
 	}
 }
 

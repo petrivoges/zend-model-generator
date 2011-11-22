@@ -11,11 +11,19 @@ class Generator_Template
 	 */
 	protected $container;
 	
+	/**
+	 * Create new renderer instance
+	 * @param Generator_Container $container
+	 */
 	public function __construct(Generator_Container $container)
 	{
 		$this->container = $container;
 	}
 	
+	/**
+	 * Generate and save table models
+	 * @param Generator_Table $table
+	 */
 	public function make(Generator_Table $table)
 	{
 		$templates = array(
@@ -49,7 +57,7 @@ class Generator_Template
 		
 		// save
 		if(!file_exists($table->getModelFilePath()))
-			file_put_contents($table->getModelFilePath(), $modelFile->generate());
+			$this->saveFile($table->getModelFilePath(), $modelFile->generate());
 				
 		////////////////////////////////////////////
 		// create model base
@@ -58,13 +66,55 @@ class Generator_Template
 		$methods = array();
 		
 		$tmp = array();
-		foreach ($table->getProperties() as $property)
-			$tmp[] = array('name' => 'property', 'description' => $property['type'] . ' $'.$property['name'].' '.$property['desc']);
+		foreach ($table->getProperties() as $property){
+			
+			$tmp[] = array(
+				'name' => 'property',
+				'description' => $property['type'] . ' $'.$property['name'].' '.$property['desc']
+			);
+		
+			// getters and setters
+			if($this->container->getConfig()->options->getset == true){
+				
+				$methods[] = new Zend_CodeGenerator_Php_Method(array(
+					'name' => 'set'.$table->formatFunctionName($property['name']),
+					'docblock' => new Zend_CodeGenerator_Php_Docblock(array(
+						'shortDescription' => 'Set '.$property['name'].' ('.$property['desc'].')',
+						'tags' => array(
+							 new Zend_CodeGenerator_Php_Docblock_Tag_Param(array(
+							 	'paramName' => 'value', 'dataType' => $property['type']
+							)),
+							array('name' => 'return', 'description' => $table->getBaseName()),
+						),
+					)),
+					'parameters' => array(
+						array('name' => 'value'),
+					),
+					'body' =>
+						'$this->'.$property['name'].' = $value;' . PHP_EOL
+						.	'return $this;',
+				));
+				
+				$methods[] = new Zend_CodeGenerator_Php_Method(array(
+					'name' => 'get'.$table->formatFunctionName($property['name']),
+					'docblock' => new Zend_CodeGenerator_Php_Docblock(array(
+						'shortDescription' => 'Get '.$property['name'].' ('.$property['desc'].')',
+						'tags' => array(
+							array('name' => 'return', 'description' => $property['type']),
+						),
+					)),
+					'parameters' => array(),
+					'body' =>
+						'return $this->'.$property['name'].';',
+				));
+			}
+		}
 		
 		$tmp[] = array('name' => 'method', 'description' => $table->getTableName() . ' getTable()');
-			
+		
 		// create methods
 		foreach ($table->getChildren() as $child){
+			
 			$methodName = $child['child'];
 			$pattern = '#^'.$table->getName().'_(.*)$#i';
 			if(preg_match($pattern, $methodName)){
@@ -121,7 +171,7 @@ class Generator_Template
 					),
 				)),
 				'parameters' => array(
-					array('name' => 'where = null'), // @todo must be null
+					array('name' => 'where = null'),
 					array('name' => 'order = null'),
 					array('name' => 'count = null'),
 					array('name' => 'offset = null'),
@@ -155,8 +205,8 @@ class Generator_Template
 		// parents
 		
 		foreach ($table->getParents() as $parent){
-			$methodName = $parent['parent'];
 			
+			$methodName = $parent['parent'];
 			$children = $table->getChildren();
 			
 			// if there is a child table with the same name add "parent" prefix
@@ -165,12 +215,10 @@ class Generator_Template
 			}
 			
 			$pattern = '#^'.$table->getName().'_(.*)$#i';
-			if(preg_match($pattern, $methodName)){
+			if(preg_match($pattern, $methodName))
 				$methodName = preg_replace($pattern, '\\1', $methodName);
-			}
-			
+
 			$methodName = $table->formatFunctionName($methodName);
-			
 			$methods[] = new Zend_CodeGenerator_Php_Method(array(
 				'name' => 'find'.$methodName,
 				'docblock' => new Zend_CodeGenerator_Php_Docblock(array(
@@ -196,7 +244,7 @@ class Generator_Template
 					),
 				)),
 				'parameters' => array(
-					array('name' => 'where = null'), // @todo must be null
+					array('name' => 'where = null'),
 					array('name' => 'order = null'),
 					array('name' => 'count = null'),
 					array('name' => 'offset = null'),
@@ -221,7 +269,7 @@ class Generator_Template
 		));
 		
 		// save
-		file_put_contents($table->getBaseFilePath(), $modelBaseFile->generate());
+		$this->saveFile($table->getBaseFilePath(), $modelBaseFile->generate());
 		
 		////////////////////////////////////////////
 		// create table
@@ -243,7 +291,7 @@ class Generator_Template
 		
 		// save
 		if(!file_exists($table->getTableFilePath()))
-			file_put_contents($table->getTableFilePath(), $modelTableFile->generate());
+			$this->saveFile($table->getTableFilePath(), $modelTableFile->generate());
 		
 		////////////////////////////////////////////
 		// create table base
@@ -304,7 +352,20 @@ class Generator_Template
 		));
 		
 		// save
-		file_put_contents($table->getTableBaseFilePath(), $modelTableBaseFile->generate());
+		$this->saveFile($table->getTableBaseFilePath(), $modelTableBaseFile->generate());
+		return;
+	}
+	
+	/**
+	 * Save file
+	 * @param string $destination
+	 * @param string $data
+	 */
+	protected function saveFile($destination, $data)
+	{
+		if($this->container->getConfig()->options->testMode == true)
+			return;
+		file_put_contents($destination, $data);
 		return;
 	}
 }

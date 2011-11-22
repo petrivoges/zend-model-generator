@@ -8,11 +8,6 @@
 class Generator_Analyzer
 {
 	/**
-	 * @var Zend_Db_Table_Abstract
-	 */
-	private $table;
-	
-	/**
 	 * @var Generator_Container
 	 */
 	private $container;
@@ -21,36 +16,16 @@ class Generator_Analyzer
 	 * Create new analyzer
 	 * @param Zend_Db_Table_Abstract $table
 	 */
-	public function __construct(Zend_Db_Table_Abstract $table, Generator_Container $container)
+	public function __construct(Generator_Container $container)
 	{
-		$this->table = $table;
 		$this->container = $container;
-	}
-	
-	/**
-	 * @param Zend_Db_Table_Abstract $table
-	 * @return Generator_Analyzer
-	 */
-	public static function factory(Zend_Db_Table_Abstract $table)
-	{
-		return new self($table);
-	}
-	
-	/**
-	 * @return Zend_Db_Table_Abstract
-	 */
-	protected function getTable()
-	{
-		return $this->table;
 	}
 	
 	/**
 	 * Start analyzer
 	 */
-	public function analyze()
+	public function analyze( Zend_Db_Table_Abstract $table )
 	{
-		$table = $this->getTable();
-		
 		$info = $table->info();
 		$info['uniques'] = array();
 		unset(

@@ -2,3 +2,4 @@
 cd ./mg
 php ./zg.php %*
 cd ..
+pause
