@@ -7,7 +7,7 @@
  */
 class Generator_Dependencies
 {
-	private static $dependencies = array();
+	public $dependencies = array();
 
 	/**
 	 * Set current $table as a child for $fTable
@@ -34,7 +34,7 @@ class Generator_Dependencies
 	 */
 	protected function addChild($table, $col, $childTable, $childCol, $childKey)
 	{
-		self::$dependencies[$table]['children'][$childTable] = array(
+		$this->dependencies[$table]['children'][$childTable] = array(
 			'col' => $col,
 			'childKey' => $childKey,
 			'childCol' => $childCol,
@@ -52,7 +52,7 @@ class Generator_Dependencies
 	 */
 	protected function addParent($table, $col, $key, $parentTable, $parentCol)
 	{
-		self::$dependencies[$table]['parents'][$parentTable] = array(
+		$this->dependencies[$table]['parents'][$parentTable] = array(
 			'parent' => $parentTable,
 			'key' => $key,
 			'col' => $col,
@@ -67,8 +67,8 @@ class Generator_Dependencies
 	 */
 	public function getChildrenOf($tableName)
 	{
-		if(isset(self::$dependencies[$tableName]['children'])){
-			return self::$dependencies[$tableName]['children'];
+		if(isset($this->dependencies[$tableName]['children'])){
+			return $this->dependencies[$tableName]['children'];
 		}else{
 			return array();
 		}
@@ -81,8 +81,8 @@ class Generator_Dependencies
 	 */
 	public function getParentsOf($tableName)
 	{
-		if(isset(self::$dependencies[$tableName]['parents'])){
-			return self::$dependencies[$tableName]['parents'];
+		if(isset($this->dependencies[$tableName]['parents'])){
+			return $this->dependencies[$tableName]['parents'];
 		}else{
 			return array();
 		}
@@ -95,8 +95,8 @@ class Generator_Dependencies
 	 */
 	public function getDependenciesFor($tableName)
 	{
-		if(!empty(self::$dependencies[$tableName])){
-			return self::$dependencies[$tableName];
+		if(!empty($this->dependencies[$tableName])){
+			return $this->dependencies[$tableName];
 		}
 		return null;
 	}
@@ -107,6 +107,6 @@ class Generator_Dependencies
 	 */
 	public function toArray()
 	{
-		return self::$dependencies;
+		return $this->dependencies;
 	}
 }

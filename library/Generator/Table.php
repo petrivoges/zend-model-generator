@@ -35,7 +35,7 @@ class Generator_Table
 			throw new Generator_Exception('Table parameter must be a string.');
 		
 		$this->container = $container;
-		$this->info = $this->container->getAnalyzer($this->table)->analyze();
+		$this->info = $this->container->getAnalyzer()->analyze($this->table);
 	}
 	
 	/**
