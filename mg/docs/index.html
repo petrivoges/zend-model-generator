@@ -1,5 +1,5 @@
 <!-- @version $Id: README.txt 15 2011-11-19 17:25:01Z kobus.jacek@gmail.com $ -->
-<h1>Jack's Model Generator</h1>
+<h1>Jack's Model Generator 2.0</h1>
 
 <em>Thank you for using my model generator. I hope it will save you hours of work, as it did for me - Jack.</em>
 
@@ -14,39 +14,113 @@
 <h2>How it works ?</h2>
 
 <p>ModelGenerator analyzes your database looking for relations and keys - primary and unique.
-Remember that each table MUST have PRIMARY key defined. Generator will not work without it. It's a good practice so
-remember to add at least "auto_increment" column in your tables.
-</p>
+<b>By default</b> it is working in test mode. It means that no files will be created nor modified.
+You can change this setting in the configuration file.
+Remember that each table MUST have PRIMARY key defined. It's a good practice, so
+remember to add at least "auto_increment" column in your tables. Otherwise Generator will puke an error, unless you selected option "ignore errors".
+In that case table that caused the problem will be skipped, but that may lead to an inconsistency in relations.
 
-<h2>How models work ?</h2>
+<br>
+<br>
+
+<q>I would go even stronger: 100% of tables must have a primary key.  In   
+some respects, a table isn't a table if it has no primary key   
+constraint.</q>
+<a href="http://zend-framework-community.634137.n4.nabble.com/Re-Zend-Db-Table-Exception-quot-A-table-must-have-a-primary-key-but-none-was-found-quot-td2239919.html">Bill Karwin</a>
+
+</p>
 
 <p>Generator will create 4 files for each table. An empty class - model, base model, table model and table base.
 The first one - model, is a file where you can write your own code. It will not be modified nor removed
 even if you will run Generator more than once.
 <br>
 <br>
-Base model - this file contains automatically generated code, along with some documentation
-helping you php editor in auto-completing your code. There are also very helpfull methods like 
-find*Parent*, find*childTable*, create*Child*, delete*child*.
+Base model contains automatically generated code, along with some documentation
+helping your php editor in auto-completing your code. There are also very helpfull methods like 
+find*Parent*, find*childTable*, create*Child*, delete*Child* etc..
 
 Remember that you are NOT allowed to edit this file, as it will change as soon as you will 
-try to re-generate your code. The code will be replaced and all changes will be lost.
+try to re-generate your code - all changes will be lost.
 <br>
 <br>
 
-Table model is very similar to model. It's a file where you can put some of your hand-written code.
+Table model is very similar to model. It's a file where you can put some of your own code.
 <br>
 <br>
 
 Table base was made for the same purpose as the base model - it's auto-generated and all 
-changes made to this file will be lost as soon as you'll lunch the Generator.
+changes made to this file will be lost as soon as you'll re-lunch the Generator.
 
 </p>
 
-<h2>How to use models in your project ?</h2>
+<h2>Directory structure (recommended)</h2>
 
-... tbc
+<pre>
+-- public
+	|-- index.php (domain points here)
+	
+-- scripts
+-- application
+    |-- controllers
+    |-- models
+    |-- forms
+    |-- modules (set this as "destination" in generator's config.ini)
+    	|-- Website.php (your main model)
+    |-- etc.
+    
+-- zg.bat (you can also move this file to "scripts" - remember to update path inside)
+-- mg
+    |-- config.ini
+    |-- zg.php
+    
+-- library
+    |-- Generator.php
+    |-- Generator
+    |-- Website
+    |-- Zend
+    |-- etc.
+</pre>
 
-<h2>Additional classes - "Website_"</h2>
+<p>After each change in database you will just have to lunch zg.bat to regenerate all models. Make sure to use SVN or GIT to keep an eye on those files.</p>
 
-... tbc
+<h2>"Website_" classes</h2>
+
+<dt>Website_DbTable_Row_Abstract</dt>
+<dd>Extension for Db table row. It extends Zend_Db_Table_Row_Abstract
+<h3>Methods avilable:</h3>
+<ul>
+	<li>bool isNewRow()</li>
+	<li>bool isChangedRow() - deprecated</li>
+	<li>bool wasChanged()</li>
+	<li>array getModifiedFields()</li>
+	<li>Zend_Db_Adapter_Abstract getAdapter()</li>
+	<li>Model_Website getModel()</li>
+	<li>Model_Abstract addEvent()</li>
+	<li>bool eventExists()</li>
+	<li>void triggerEvent()</li>
+	<li>Model_Abstract addEventWatcher()</li>
+	<li>Model_Abstract addEventWatchers()</li>
+	<li>Model_Abstract getEventWatchers()</li>
+	<li>Website_Model_DbTable_Row_Abstract watchNewRow(Website_Db_Table_Row $row)</li>
+	<li>Website_Model_DbTable_Row_Abstract watchChildRow(Website_Db_Table_Row $row)</li>
+	<li>Website_Model_DbTable_Row_Abstract watchChildrenRowset(Zend_Db_Table_Rowset_Abstract $rowset)</li>
+	<li>Website_Model_DbTable_Row_Abstract watchParentRow(Website_Db_Table_Row $row)</li>
+	<li>Zend_Db_Table_Row_Abstract findParentRow()</li>
+	<li>Zend_Db_Table_Rowset_Abstract findDependentRowset()</li>
+	<li>Zend_Db_Table_Rowset_Abstract findManyToManyRowset(string|array $where, string $order, int $count, int $offset, string|Zend_Db_Table_Abstract $matchTable, string|Zend_Db_Table_Abstract $intersectionTable, string $callerRefRule, string $matchRefRule)
+	<a href="http://framework.zend.com/manual/en/zend.db.table.relationships.html#zend.db.table.relationships.fetching.many-to-many">see more</a>.
+	</li>
+</ul>
+</dd>
+
+<dt>Website_DbTable_Abstract</dt>
+<dd>This is an extension for Db table classes. It extends Zend_Db_Table_Abstract.
+<h3>Methods avilable:</h3>
+<ul>
+	<li>string getName() - get table name</li>
+	<li>Model_Website <b>getModel()</b> - returns "main" model class if you are using one.</li>
+	<li>Zend_Db_Table_Row_Abstract <b>findOne(sting|array $where, string $order)</b> - find ONE row</li>
+	<li>Zend_Db_Table_Rowset_Abstract <b>findAll(sting|array $where, string $order, int $limit, int $offset)</b> - find all rows matching criteria</li>
+	<li>int <b>count(sting|array $where)</b> - count all rows matching criteria</li>
+</ul>
+</dd>
