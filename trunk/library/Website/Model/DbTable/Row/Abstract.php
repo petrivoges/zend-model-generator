@@ -72,6 +72,7 @@ class Website_Model_DbTable_Row_Abstract extends Zend_Db_Table_Row_Abstract
 	/**
 	 * Tell if row data was changed
 	 * @param string $property Optional; if ommited whole row is checked for changes
+	 * @deprecated
 	 * @return bool
 	 */
 	public function isChangedRow($property = null)
@@ -92,7 +93,13 @@ class Website_Model_DbTable_Row_Abstract extends Zend_Db_Table_Row_Abstract
 	 */
 	public function wasChanged($property = null)
 	{
-		return $this->isChangedRow($property);
+		if(empty($this->_modifiedFields)){
+			return false;
+		}
+		if($property !== null){
+			return isset($this->_modifiedFields[$property]);
+		}
+		return true;
 	}
 	
 	/**
@@ -407,9 +414,9 @@ class Website_Model_DbTable_Row_Abstract extends Zend_Db_Table_Row_Abstract
 	/**
 	 * Watch row and update it on parent's post-save
 	 * @param Website_Db_Table_Row $row
-	 * @return Model_Abstract
+	 * @return Website_Model_DbTable_Row_Abstract
 	 */
-	public function watchNewRow(Model_Abstract $row)
+	public function watchNewRow(Website_Db_Table_Row $row)
 	{
 		$this->addEventWatcher($row, 'save', self::EVENT_POST_SAVE, null, false);
 		return $this;
@@ -418,9 +425,9 @@ class Website_Model_DbTable_Row_Abstract extends Zend_Db_Table_Row_Abstract
 	/**
 	 * Watch child row and update it on parent's post-save
 	 * @param Website_Db_Table_Row $row
-	 * @return Model_Abstract
+	 * @return Website_Model_DbTable_Row_Abstract
 	 */
-	public function watchChildRow(Model_Abstract $row)
+	public function watchChildRow(Website_Db_Table_Row $row)
 	{
 		$this->addEventWatcher($row, 'save', self::EVENT_POST_SAVE, null, false);
 		return $this;
@@ -428,10 +435,10 @@ class Website_Model_DbTable_Row_Abstract extends Zend_Db_Table_Row_Abstract
 		
 	/**
 	 * Watch children rowset and update it on parent's post-save
-	 * @param Website_Db_Table_Rowset $rowset
-	 * @return Model_Abstract
+	 * @param Zend_Db_Table_Rowset_Abstract $rowset
+	 * @return Website_Model_DbTable_Row_Abstract
 	 */
-	public function watchChildrenRowset(Zend_Db_Table_Rowset $rowset)
+	public function watchChildrenRowset(Zend_Db_Table_Rowset_Abstract $rowset)
 	{
 		$this->addEventWatcher($rowset, 'save', self::EVENT_POST_SAVE, null, false);
 		return $this;
@@ -440,9 +447,9 @@ class Website_Model_DbTable_Row_Abstract extends Zend_Db_Table_Row_Abstract
 	/**
 	 * Watch parent row and update it before current object's save
 	 * @param Website_Db_Table_Row $row
-	 * @return Model_Abstract
+	 * @return Website_Model_DbTable_Row_Abstract
 	 */
-	public function watchParentRow(Model_Abstract $row)
+	public function watchParentRow(Website_Db_Table_Row $row)
 	{
 		$this->addEventWatcher($row, 'save', self::EVENT_SAVE, null, false);
 		return $this;
