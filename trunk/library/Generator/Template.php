@@ -240,7 +240,7 @@ class Generator_Template
 							'paramName' => 'offset', 'dataType' => 'int',
 						)),
 						
-						array('name' => 'return', 'description' => 'Zend_Db_Table_Rowset_Abstract'),
+						array('name' => 'return', 'description' => $table->getModelName($parent['parent'])),
 					),
 				)),
 				'parameters' => array(
@@ -249,7 +249,7 @@ class Generator_Template
 					array('name' => 'count = null'),
 					array('name' => 'offset = null'),
 				),
-				'body' => 'return $this->findDependentRowset(\''.$table->getTableName($parent['parent']).'\', $where, $order, $count, $offset);',
+				'body' => 'return $this->findParentRow(\''.$table->getTableName($parent['parent']).'\', $where, $order, $count, $offset);',
 			));
 		}
 		
@@ -311,7 +311,9 @@ class Generator_Template
 						new Zend_CodeGenerator_Php_Docblock_Tag_Param(array(
 							'paramName' => 'value', 'dataType' => 'mix',
 						)),
-						array('name' => 'return', 'description' => 'Zend_Db_Table_Row'),
+						// fix for Issue #6
+						//array('name' => 'return', 'description' => 'Zend_Db_Table_Row'),
+						array('name' => 'return', 'description' => $table->getModelName()),
 					),
 				)),
 				'parameters' => array(
