@@ -72,7 +72,7 @@ class Website_Model_DbTable_Row_Abstract extends Zend_Db_Table_Row_Abstract
 	/**
 	 * Tell if row data was changed
 	 * @param string $property Optional; if ommited whole row is checked for changes
-	 * @deprecated
+	 * @deprecated use wasChanged() instead
 	 * @return bool
 	 */
 	public function isChangedRow($property = null)

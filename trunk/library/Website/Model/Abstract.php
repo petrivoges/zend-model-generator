@@ -21,6 +21,7 @@ abstract class Website_Model_Abstract
 	
 	/**
 	 * Get instance of Model_Website (alias for getInstance for compatybility)
+	 * @deprecated
 	 * @return Model_Website
 	 */
 	public static function get()
@@ -104,6 +105,7 @@ abstract class Website_Model_Abstract
 	}
 	
 	/**
+	 * @deprecated
 	 * @return Zend_Controller_Front
 	 */
 	protected function getFrontController()
