@@ -58,15 +58,21 @@ class Generator_Analyzer
 		$lines = explode("\n", $query);
 		$tblinfo = array();
 		$keys = array();
+		
 		foreach ($lines as $line) {
-			preg_match('/^\s*CONSTRAINT `(\w+)` FOREIGN KEY \(`(\w+)`\) REFERENCES `(\w+)` \(`(\w+)`\)/',$line, $tblinfo);
+			preg_match('/^\s*CONSTRAINT `(\w+)` FOREIGN KEY \((.*)\) REFERENCES `(\w+)` \((.*)\)/',$line, $tblinfo);
 			if (sizeof($tblinfo) > 0) {
 				$keys[] = $tmp = array(
 					'key' 		=> $tblinfo[1],
-					'column' 	=> $tblinfo[2],
+					'column' 	=> $this->extractColumnNames($tblinfo[2]),
 					'fk_table' 	=> $tblinfo[3],
-					'fk_column' => $tblinfo[4]
+					'fk_column' => $this->extractColumnNames($tblinfo[4])
 				);
+					
+				/*if($info['name'] == 'region_players'){
+					var_dump($keys);
+					die;
+				}*/
 				
 				$this->getDependencyChecker()->isChild(
 					$info['name'],
@@ -76,8 +82,21 @@ class Generator_Analyzer
 					$tmp['fk_column']);
 			}
 		}
+		
 		$info['foreign_keys'] = $keys;
 		return $info;
+	}
+	
+	/**
+	 * Get column names using regex from create table sql
+	 * @param string $string
+	 * @return array
+	 */
+	protected function extractColumnNames($string){
+		$match = array();
+		$pattern = '#[a-zA-Z0-9_]+#';
+		preg_match_all($pattern, $string, $match);
+		return $match[0];
 	}
 	
 	/**

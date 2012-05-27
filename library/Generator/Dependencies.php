@@ -34,7 +34,7 @@ class Generator_Dependencies
 	 */
 	protected function addChild($table, $col, $childTable, $childCol, $childKey)
 	{
-		$this->dependencies[$table]['children'][$childTable] = array(
+		$this->dependencies[$table]['children'][] = array(
 			'col' => $col,
 			'childKey' => $childKey,
 			'childCol' => $childCol,
@@ -52,7 +52,7 @@ class Generator_Dependencies
 	 */
 	protected function addParent($table, $col, $key, $parentTable, $parentCol)
 	{
-		$this->dependencies[$table]['parents'][$parentTable] = array(
+		$this->dependencies[$table]['parents'][] = array(
 			'parent' => $parentTable,
 			'key' => $key,
 			'col' => $col,
