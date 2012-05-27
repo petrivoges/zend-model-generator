@@ -68,11 +68,6 @@ class Generator_Analyzer
 					'fk_table' 	=> $tblinfo[3],
 					'fk_column' => $this->extractColumnNames($tblinfo[4])
 				);
-					
-				/*if($info['name'] == 'region_players'){
-					var_dump($keys);
-					die;
-				}*/
 				
 				$this->getDependencyChecker()->isChild(
 					$info['name'],
