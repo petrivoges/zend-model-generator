@@ -325,9 +325,10 @@ class Generator_Table
 	{
 		$tmp = array();
 		$tables = $this->container->getDependencyChecker()->getChildrenOf($this->getName());
+
 		if(is_array($tables)){
-			foreach ($tables as $name => $smth){
-				$tmp[] = $this->getTableName($name);
+			foreach ($tables as $id => $info){
+				$tmp[] = $this->getTableName($info['child']);
 			}
 			return $tmp;
 		}else{
@@ -358,16 +359,6 @@ class Generator_Table
 			return $this->info['phptypes'][$column];
 		}
 		return null;
-	}
-	
-	public function getCustomVar()
-	{
-		
-	}
-	
-	public function getCustomVars()
-	{
-
 	}
 	
 	/**

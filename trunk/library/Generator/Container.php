@@ -60,11 +60,6 @@ class Generator_Container
 		return new Generator_Template($this);
 	}
 	
-	public function getTemplate()
-	{
-		
-	}
-	
 	/**
 	 * @return Generator_Dependencies
 	 */

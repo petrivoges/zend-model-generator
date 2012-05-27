@@ -26,6 +26,7 @@ class Generator_Template
 	 */
 	public function make(Generator_Table $table)
 	{
+		
 		$templates = array(
 			'longClassDescription' =>
 				'This class has been generated automatically by Jack\'s Model Generator.' . PHP_EOL
@@ -115,6 +116,8 @@ class Generator_Template
 		// create methods
 		foreach ($table->getChildren() as $child){
 			
+			$existingChildren[$child['child']] = true;
+			
 			$methodName = $child['child'];
 			$pattern = '#^'.$table->getName().'_(.*)$#i';
 			if(preg_match($pattern, $methodName)){
@@ -123,6 +126,11 @@ class Generator_Template
 			$methodName = $table->formatFunctionName($methodName);
 			
 			// method 1 create
+			
+			$methodBody = '';
+			foreach($child['childCol'] as $id => $childCol){
+				$methodBody .= '$data[\''.$child['childCol'][$id].'\'] = $this->'.$child['col'][$id] . ';' . PHP_EOL;
+			}
 			
 			$methods[] = new Zend_CodeGenerator_Php_Method(array(
 				'name' => 'create'.$methodName,
@@ -136,10 +144,10 @@ class Generator_Template
 					),
 				)),
 				'parameters' => array(
-					array('name' => 'data'),
+					new Zend_CodeGenerator_Php_Parameter(array('name' => 'data', 'defaultValue' => array() )),
 				),
 				'body' =>
-					'$data[\''.$child['childCol'].'\'] = $this->'.$child['col'] . ';' . PHP_EOL
+					$methodBody
 					.	'$table = new '.$table->getTableName($child['child']) . '();' . PHP_EOL
 					.	'return $table->createRow($data);',
 			));
@@ -181,6 +189,11 @@ class Generator_Template
 			
 			// method 3 delete
 			
+			$methodBody = '';
+			foreach($child['childCol'] as $id => $childCol){
+				$methodBody .= '$data[\''.$child['childCol'][$id].'\'] = $this->'.$child['col'][$id] . ';' . PHP_EOL;
+			}
+			
 			$methods[] = new Zend_CodeGenerator_Php_Method(array(
 				'name' => 'delete'.$methodName,
 				'docblock' => new Zend_CodeGenerator_Php_Docblock(array(
@@ -196,7 +209,7 @@ class Generator_Template
 					array('name' => 'where = array()'),
 				),
 				'body' =>
-					'$where[\''.$child['childCol'].'\'] = $this->'.$child['col'] . ';' . PHP_EOL
+					$methodBody
 					.	'$table = new '.$table->getTableName($child['child']) . '();' . PHP_EOL
 					.	'return $table->delete($where);',
 			));
@@ -210,7 +223,7 @@ class Generator_Template
 			$children = $table->getChildren();
 			
 			// if there is a child table with the same name add "parent" prefix
-			if(isset($children[$methodName])){
+			if(isset($existingChildren[$methodName])){
 					$methodName = 'parent_'.$methodName;
 			}
 			
@@ -252,7 +265,7 @@ class Generator_Template
 				'body' => 'return $this->findParentRow(\''.$table->getTableName($parent['parent']).'\', $where, $order, $count, $offset);',
 			));
 		}
-		
+
 		$modelBase = new Zend_CodeGenerator_Php_Class(array(
 			'name' => $table->getBaseName(),
 			'docblock' => new Zend_CodeGenerator_Php_Docblock(array(
@@ -311,8 +324,6 @@ class Generator_Template
 						new Zend_CodeGenerator_Php_Docblock_Tag_Param(array(
 							'paramName' => 'value', 'dataType' => 'mix',
 						)),
-						// fix for Issue #6
-						//array('name' => 'return', 'description' => 'Zend_Db_Table_Row'),
 						array('name' => 'return', 'description' => $table->getModelName()),
 					),
 				)),
