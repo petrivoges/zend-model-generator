@@ -191,7 +191,7 @@ class Generator_Template
 			
 			$methodBody = '';
 			foreach($child['childCol'] as $id => $childCol){
-				$methodBody .= '$data[\''.$child['childCol'][$id].'\'] = $this->'.$child['col'][$id] . ';' . PHP_EOL;
+				$methodBody .= '$where[\''.$child['childCol'][$id].'\'] = $this->'.$child['col'][$id] . ';' . PHP_EOL;
 			}
 			
 			$methods[] = new Zend_CodeGenerator_Php_Method(array(
