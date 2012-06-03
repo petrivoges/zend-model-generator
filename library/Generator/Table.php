@@ -63,6 +63,34 @@ class Generator_Table
 	}
 	
 	/**
+	 * @param string $name
+	 * @return bool
+	 */
+	public function hasChild($name)
+	{
+		return $this->countChildren($name) > 0;
+	}
+	
+	/**
+	 * Count how many relations table has to a specified child table or all children.
+	 * @param string $name optional
+	 * @return int
+	 */
+	public function countChildren($name = null)
+	{
+		$count = 0;
+		foreach($this->getChildren() as $child){
+			if($name !== null){
+				if($child['child'] == $name)
+					$count++;
+			}else{
+				$count++;
+			}
+		}
+		return $count;
+	}
+	
+	/**
 	 * @return array
 	 */
 	public function getDependentTables()
