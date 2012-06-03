@@ -2,7 +2,7 @@
 
 /**
  * @author Jacek Kobus <kobus.jacek@gmail.com>
- * @version $Id$
+ * @version $Id: Template.php 61 2012-05-30 15:22:02Z jacek $
  */
 class Generator_Template
 {
@@ -113,12 +113,19 @@ class Generator_Template
 		
 		$tmp[] = array('name' => 'method', 'description' => $table->getTableName() . ' getTable()');
 		
+		/**
+		 * Create methods
+		 */
+		
 		// create methods
 		foreach ($table->getChildren() as $child){
 			
-			$existingChildren[$child['child']] = true;
-			
 			$methodName = $child['child'];
+
+			if($table->countChildren( $methodName ) > 1){
+				$methodName = $methodName . '_by_' . $child['childKey'];
+			}
+			
 			$pattern = '#^'.$table->getName().'_(.*)$#i';
 			if(preg_match($pattern, $methodName)){
 				$methodName = preg_replace($pattern, '\\1', $methodName);
@@ -154,8 +161,10 @@ class Generator_Template
 			
 			// method 2 find
 			
+			$findMethodName = 'find'.$methodName;
+			
 			$methods[] = new Zend_CodeGenerator_Php_Method(array(
-				'name' => 'find'.$methodName,
+				'name' => $findMethodName,
 				'docblock' => new Zend_CodeGenerator_Php_Docblock(array(
 					'shortDescription' => 'Find dependent '.$table->getModelName($child['child']),
 					'tags' => array(
@@ -184,7 +193,7 @@ class Generator_Template
 					array('name' => 'count = null'),
 					array('name' => 'offset = null'),
 				),
-				'body' => 'return $this->findDependentRowset(\''.$table->getTableName($child['child']).'\', $where, $order, $count, $offset);',
+				'body' => 'return $this->findDependentRowset(\''.$table->getTableName($child['child']).'\', $where, $order, $count, $offset, \''.$child['childKey'].'\');',
 			));
 			
 			// method 3 delete
@@ -215,17 +224,33 @@ class Generator_Template
 			));
 		}
 		
-		// parents
+		/**
+		 * Methods for parent tables
+		 */
+		
+		// see how many parents we have and do we have overlapping keys n there ?
+		
+		$parents = array();
+		foreach($table->getParents() as $parent){
+			if( isset($parents[$parent['parent']]) ){
+				$parents[$parent['parent']]++;
+			}else{
+				$parents[$parent['parent']] = 1;
+			}
+		}
 		
 		foreach ($table->getParents() as $parent){
 			
 			$methodName = $parent['parent'];
-			$children = $table->getChildren();
 			
-			// if there is a child table with the same name add "parent" prefix
-			if(isset($existingChildren[$methodName])){
-					$methodName = 'parent_'.$methodName;
+			if($table->hasChild( $methodName ))
+				$methodName = 'parent_'.$methodName;
+			
+			if( $parents[$parent['parent']] > 1){
+				$methodName = $methodName . '_by_' . $parent['key'];
 			}
+			
+			$children = $table->getChildren();
 			
 			$pattern = '#^'.$table->getName().'_(.*)$#i';
 			if(preg_match($pattern, $methodName))
@@ -262,7 +287,7 @@ class Generator_Template
 					array('name' => 'count = null'),
 					array('name' => 'offset = null'),
 				),
-				'body' => 'return $this->findParentRow(\''.$table->getTableName($parent['parent']).'\', $where, $order, $count, $offset);',
+				'body' => 'return $this->findParentRow(\''.$table->getTableName($parent['parent']).'\', $where, $order, $count, $offset, \''.$parent['key'].'\');',
 			));
 		}
 
