@@ -268,7 +268,7 @@ class Generator_Table
 	}
 	
 	/**
-	 * Get all avilable properties
+	 * Get all available properties
 	 * @return array
 	 */
 	public function getProperties()
@@ -425,11 +425,32 @@ class Generator_Table
 	 * @param string $string
 	 * @return string
 	 */
-	protected static function formatUnderscoreToCamel($string)
+	public static function formatUnderscoreToCamel($string)
 	{
 		$tmp = explode('_', $string);
 		foreach ($tmp as &$id){$id = ucfirst($id);}$string = implode('',$tmp);
 		return $string;
+	}
+
+	/**
+	 * Format underscored string to camelCased string (small letter at the beginning)
+	 * @param string $string
+	 * @return string
+	 */
+	public static function formatUnderscoreToLowerCamel($string)
+	{
+		return lcfirst(self::formatUnderscoreToCamel($string));
+	}
+
+	/**
+	 * Format underscored string to CamelCased string
+	 * @param $text
+	 * @internal param string $string
+	 * @return string
+	 */
+	public static function removeUnderscores($text)
+	{
+		return str_replace('_', ' ', $text);
 	}
 	
 	/**

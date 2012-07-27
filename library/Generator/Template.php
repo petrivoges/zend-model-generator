@@ -2,7 +2,8 @@
 
 /**
  * @author Jacek Kobus <kobus.jacek@gmail.com>
- * @version $Id: Template.php 61 2012-05-30 15:22:02Z jacek $
+ * @todo generate constants for SET and ENUM types; add by default Zend_Date for TIMESTAMP, DATE, DATETIME fields.
+ * @version $Id: Template.php 65 2012-06-03 18:19:59Z jacek $
  */
 class Generator_Template
 {
@@ -75,12 +76,12 @@ class Generator_Template
 			);
 		
 			// getters and setters
-			if($this->container->getConfig()->options->getset == true){
+			if($this->container->getConfig()->options->getters_setters == true){
 				
 				$methods[] = new Zend_CodeGenerator_Php_Method(array(
 					'name' => 'set'.$table->formatFunctionName($property['name']),
 					'docblock' => new Zend_CodeGenerator_Php_Docblock(array(
-						'shortDescription' => 'Set '.$property['name'].' ('.$property['desc'].')',
+						'shortDescription' => 'Set '.$property['name'].'.',
 						'tags' => array(
 							 new Zend_CodeGenerator_Php_Docblock_Tag_Param(array(
 							 	'paramName' => 'value', 'dataType' => $property['type']
@@ -95,11 +96,12 @@ class Generator_Template
 						'$this->'.$property['name'].' = $value;' . PHP_EOL
 						.	'return $this;',
 				));
-				
+
+				// default GET
 				$methods[] = new Zend_CodeGenerator_Php_Method(array(
 					'name' => 'get'.$table->formatFunctionName($property['name']),
 					'docblock' => new Zend_CodeGenerator_Php_Docblock(array(
-						'shortDescription' => 'Get '.$property['name'].' ('.$property['desc'].')',
+						'shortDescription' => 'Get '.$property['name'].'.',
 						'tags' => array(
 							array('name' => 'return', 'description' => $property['type']),
 						),
@@ -108,6 +110,44 @@ class Generator_Template
 					'body' =>
 						'return $this->'.$property['name'].';',
 				));
+
+				if($this->container->getConfig()->options->logical_getters == true){
+					// logical checks - IS
+					if(preg_match('#^is_.*$#', $property['name'])){
+
+						$methods[] = new Zend_CodeGenerator_Php_Method(array(
+							'name' => ''.$table->formatUnderscoreToLowerCamel($property['name']),
+							'docblock' => new Zend_CodeGenerator_Php_Docblock(array(
+								'shortDescription' => 'Check if '.$table->getModelName().' '.$table->removeUnderscores($property['name']).'.',
+								'tags' => array(
+									array('name' => 'return', 'description' => 'bool'),
+								),
+							)),
+							'parameters' => array(),
+							'body' =>
+								'return (bool) $this->'.$property['name'].';',
+						));
+
+					}
+
+					// logical checks - HAS
+					if(preg_match('#^has_.*$#', $property['name'])){
+
+						$methods[] = new Zend_CodeGenerator_Php_Method(array(
+							'name' => ''.$table->formatUnderscoreToLowerCamel($property['name']),
+							'docblock' => new Zend_CodeGenerator_Php_Docblock(array(
+								'shortDescription' => 'Check if '.$table->getModelName().' '.$table->removeUnderscores($property['name']).'.',
+								'tags' => array(
+									array('name' => 'return', 'description' => 'bool|'.$property['type']),
+								),
+							)),
+							'parameters' => array(),
+							'body' =>
+								'return $this->'.$property['name'].';',
+						));
+
+					}
+				}
 			}
 		}
 		
@@ -156,7 +196,9 @@ class Generator_Template
 				'body' =>
 					$methodBody
 					.	'$table = new '.$table->getTableName($child['child']) . '();' . PHP_EOL
-					.	'return $table->createRow($data);',
+					.	'$row = $table->createRow($data);' . PHP_EOL
+					.	'$this->watchRow($row);' . PHP_EOL
+					.	'return $row;',
 			));
 			
 			// method 2 find
@@ -184,7 +226,7 @@ class Generator_Template
 							'paramName' => 'offset', 'dataType' => 'int',
 						)),
 						
-						array('name' => 'return', 'description' => 'Zend_Db_Table_Rowset_Abstract'),
+						array('name' => 'return', 'description' => 'Zend_Db_Table_Rowset_Abstract|'.$table->getModelName($child['child']).'[]'),
 					),
 				)),
 				'parameters' => array(
@@ -341,13 +383,21 @@ class Generator_Template
 		
 		foreach ($table->getUniqueKeys() as $key){
 
+			$castTo = '';
+			if($table->getTypeFor($key) == 'string')
+				$castTo = '(string) ';
+			if($table->getTypeFor($key) == 'int')
+				$castTo = '(int) ';
+			if($table->getTypeFor($key) == 'float')
+				$castTo = '(int) ';
+
 			$methods[] = new Zend_CodeGenerator_Php_Method(array(
 				'name' => 'findBy'.$table->formatFunctionName($key),
 				'docblock' => new Zend_CodeGenerator_Php_Docblock(array(
-					//'shortDescription' => 'Find row by '.$table->getModelName($parent['parent']),
+					'shortDescription' => 'Find row by '.$key.'.',
 					'tags' => array(
 						new Zend_CodeGenerator_Php_Docblock_Tag_Param(array(
-							'paramName' => 'value', 'dataType' => 'mix',
+							'paramName' => 'value', 'dataType' => $table->getTypeFor($key),
 						)),
 						array('name' => 'return', 'description' => $table->getModelName()),
 					),
@@ -355,7 +405,7 @@ class Generator_Template
 				'parameters' => array(
 					array('name' => 'value'),
 				),
-				'body' => 'return $this->findOne(array(\''.$key.' = ?\' => $value));',
+				'body' => 'return $this->findOne(array(\'`'.$key.'` = ?\' => '.$castTo.'$value));',
 			));
 		}
 		

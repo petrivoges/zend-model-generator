@@ -3,9 +3,12 @@
 /**
  * Abstract model
  *
+ * You should extends this file by your own class and use it as an accessor
+ * for table models.
+ *
  * @author Jacek Kobus <kobus.jacek@gmail.com>
  * @version $Id: Abstract.php 16 2011-02-21 14:00:23Z jacek $
- * @uses Model_Website
+ * @uses Model_Website, Service_Brooker, Zend_Db_Table
  */
 abstract class Website_Model_Abstract
 {
@@ -18,7 +21,7 @@ abstract class Website_Model_Abstract
 	 * @var Zend_Db_Adapter_Abstract
 	 */
 	private $adapter = null;
-	
+
 	/**
 	 * Get instance of Model_Website (alias for getInstance for compatybility)
 	 * @deprecated
@@ -40,7 +43,7 @@ abstract class Website_Model_Abstract
 		}
 		return self::$_instance;
 	}
-	
+
 	/**
 	 * Constructor - not used
 	 */
@@ -105,7 +108,6 @@ abstract class Website_Model_Abstract
 	}
 	
 	/**
-	 * @deprecated
 	 * @return Zend_Controller_Front
 	 */
 	protected function getFrontController()
@@ -119,7 +121,8 @@ abstract class Website_Model_Abstract
 	 */
 	protected function getService()
 	{
-		return Service_Brooker::getInstance();
+		$serviceBrookerClass = 'Service_Brooker';
+		return $serviceBrookerClass::getInstance();
 	}
 	
 	/**
