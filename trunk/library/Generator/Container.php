@@ -2,7 +2,7 @@
 
 /**
  * @author Jacek Kobus <kobus.jacek@gmail.com>
- * @version $Id: Generator.php 15 2011-11-19 17:25:01Z kobus.jacek@gmail.com $
+ * @version $Id: Container.php 60 2012-05-27 12:20:44Z jacek $
  */
 class Generator_Container
 {

@@ -119,6 +119,10 @@ class Generator_Analyzer
 		if(preg_match('#^(.*)float(.*)$#', $mysqlType)){
 			$type = 'float';
 		}
+
+		if(preg_match('#^tinyint(1)$#', $mysqlType)){
+			$type = 'bool';
+		}
 		return $type;
 	}
 	
