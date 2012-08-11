@@ -50,24 +50,7 @@ class Website_Model_DbTable_Cache
 
 		if(isset(self::$storage[$key])){
 			self::$hits++;
-
 			$object = self::$storage[$key];
-
-			if($object instanceof Website_Model_DbTable_Row_Abstract){
-				if(!self::isRowModified($object)){
-					self::$hits++;
-					return $object;
-				}
-			}
-
-			if($object instanceof Zend_Db_Table_Rowset_Abstract){
-				// rows need to be rewinded so we will clone them
-				if(!$this->isRowsetModified($object)){
-					self::$hits++;
-					return $object;
-				}
-			}
-
 			return $object;
 		}
 		return false;
@@ -79,12 +62,7 @@ class Website_Model_DbTable_Cache
 	 */
 	public function set($key, $data)
 	{
-		if($data instanceof Zend_Db_Table_Rowset_Abstract){
-			$objectCopy = clone $data;
-			self::$storage[$key] = $objectCopy;
-		}else{
-			self::$storage[$key] = $data;
-		}
+		self::$storage[$key] = $data;
 	}
 
 	/**

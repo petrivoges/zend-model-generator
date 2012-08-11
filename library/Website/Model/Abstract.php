@@ -36,7 +36,7 @@ abstract class Website_Model_Abstract
 	 * Get instance of Model_Website
 	 * @return Model_Website
 	 */
-	public function getInstance()
+	public static function getInstance()
 	{
 		if(self::$_instance === null){
 			self::$_instance = new Model_Website();
@@ -124,7 +124,16 @@ abstract class Website_Model_Abstract
 		$serviceBrookerClass = 'Service_Brooker';
 		return $serviceBrookerClass::getInstance();
 	}
-	
+
+	/**
+	 * @return Model_Website
+	 */
+	protected function getModel()
+	{
+		$model = 'Model_Website';
+		return $model::getInstance();
+	}
+
 	/**
 	 * Magic alias for getTable()
 	 * @param string $table

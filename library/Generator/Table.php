@@ -462,6 +462,24 @@ class Generator_Table
 	{
 		return ucfirst($this->formatUnderscoreToCamel($name));
 	}
+
+	/**
+	 * Format child column names into UserIdAndBugId for user_id and bug_id in one FK
+	 * @param $columns
+	 * @return string
+	 */
+	public function formatForeignKeysMethodName($columns)
+	{
+		if(!is_array($columns))
+			$columns = array($columns);
+		$newColumns = array();
+
+		foreach($columns as $column)
+			$newColumns[] = $column;
+			//$newColumns[] = $this->formatUnderscoreToCamel($column);
+
+		return implode('_and_', $newColumns);
+	}
 	
 	/**
 	 * Format filename

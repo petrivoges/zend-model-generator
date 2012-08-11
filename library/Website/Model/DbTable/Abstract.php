@@ -113,6 +113,7 @@ class Website_Model_DbTable_Abstract extends Zend_Db_Table_Abstract
 	 */
 	public function fetchAll($where = null, $order = null, $count = null, $offset = null)
 	{
+		// @todo dlaczego gdy dajemy selct pomija pobieranie pozostalych parametrow ? SPRAWDZIC !
 		if (!($where instanceof Zend_Db_Table_Select)) {
 			$select = $this->select();
 			if ($where !== null)
@@ -128,6 +129,7 @@ class Website_Model_DbTable_Abstract extends Zend_Db_Table_Abstract
 		$cacheKey = md5($select->assemble());
 		if( ($rowset = $this->getRuntimeCache()->get( $cacheKey )) === false){
 			$rows = $this->_fetch($select);
+
 			$data = array(
 				'table' => $this,
 				'data' => $rows,
@@ -143,7 +145,10 @@ class Website_Model_DbTable_Abstract extends Zend_Db_Table_Abstract
 			}
 
 			$rowset = new $rowsetClass($data);
-			$this->getRuntimeCache()->set($cacheKey, $rowset);
+			if($rowset->count() > 0){
+				// save rowset ONLY if it has some results
+				$this->getRuntimeCache()->set($cacheKey, $rowset);
+			}
 		}
 		return $rowset;
 	}
@@ -198,6 +203,7 @@ class Website_Model_DbTable_Abstract extends Zend_Db_Table_Abstract
 	 * Count rows
 	 * @param string|array $where
 	 * @return int
+	 * @todo dodac obsluge dla selecta
 	 */
 	public function count($where = null)
 	{
