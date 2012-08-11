@@ -2,6 +2,7 @@
 
 /**
  * Abstract row model
+ * @method Website_Model_DbTable_Abstract getTable
  * @author Jacek Kobus <kobus.jacek@gmail.com>
  * @version $Id: Abstract.php 51 2011-08-06 00:00:13Z jacek $
  */
@@ -47,7 +48,6 @@ class Website_Model_DbTable_Row_Abstract extends Zend_Db_Table_Row_Abstract
 	public function init()
 	{
 		parent::init();
-		$this->_cache = new Website_Model_DbTable_Cache();
 	}
 
 	/**
@@ -55,7 +55,7 @@ class Website_Model_DbTable_Row_Abstract extends Zend_Db_Table_Row_Abstract
 	 */
 	public function getRuntimeCache()
 	{
-		return $this->_cache;
+		return $this->getTable()->getRuntimeCache();
 	}
 
 	/**
@@ -77,12 +77,10 @@ class Website_Model_DbTable_Row_Abstract extends Zend_Db_Table_Row_Abstract
 	 */
 	public function isChangedRow($property = null)
 	{
-		if (empty($this->_modifiedFields)) {
+		if (empty($this->_modifiedFields))
 			return false;
-		}
-		if ($property !== null) {
+		if ($property !== null)
 			return isset($this->_modifiedFields[$property]);
-		}
 		return true;
 	}
 
@@ -120,60 +118,6 @@ class Website_Model_DbTable_Row_Abstract extends Zend_Db_Table_Row_Abstract
 	protected function getModel()
 	{
 		return Model_Website::get();
-	}
-
-	/**
-	 * @use getRuntimeCache()
-	 * @deprecated
-	 */
-	public function disableCache()
-	{
-		throw new Website_Model_Exception('This method is not supported. Use getRuntimeCache() instead.');
-	}
-
-	/**
-	 * @use getRuntimeCache()
-	 * @deprecated
-	 */
-	public function cleanCache()
-	{
-		throw new Website_Model_Exception('This method is not supported. Use getRuntimeCache() instead.');
-	}
-
-	/**
-	 * @use getRuntimeCache()
-	 * @deprecated
-	 */
-	public function enableCache()
-	{
-		throw new Website_Model_Exception('This method is not supported. Use getRuntimeCache() instead.');
-	}
-
-	/**
-	 * @use getRuntimeCache()
-	 * @deprecated
-	 */
-	protected function findCache($key)
-	{
-		throw new Website_Model_Exception('This method is not supported. Use getRuntimeCache() instead.');
-	}
-
-	/**
-	 * @use getRuntimeCache()
-	 * @deprecated
-	 */
-	protected function writeCache($key, $data)
-	{
-		throw new Website_Model_Exception('This method is not supported. Use getRuntimeCache() instead.');
-	}
-
-	/**
-	 * @use getRuntimeCache()
-	 * @deprecated
-	 */
-	public function isCacheEnabled()
-	{
-		throw new Website_Model_Exception('This method is not supported. Use getRuntimeCache() instead.');
 	}
 
 	/**
@@ -403,28 +347,15 @@ class Website_Model_DbTable_Row_Abstract extends Zend_Db_Table_Row_Abstract
 	/**
 	 * Eof events
 	 */
-	/**
-	 * Watch row and update it on parent's post-save
-	 * @deprecated use watchRow() instead.
-	 * @param Website_Model_DbTable_Row_Abstract $row
-	 * @return Zend_Db_Table_Row_Abstract
-	 */
+
 	public function watchNewRow(Zend_Db_Table_Row_Abstract $row)
 	{
-		$this->addEventWatcher($row, 'save', self::EVENT_POST_SAVE, null, false);
-		return $this;
+		throw new Exception('Use watchRow() instead !');
 	}
 
-	/**
-	 * Watch child row and update it on parent's post-save
-	 * @deprecated use watchRow() instead.
-	 * @param Website_Model_DbTable_Row_Abstract $row
-	 * @return Website_Model_DbTable_Row_Abstract
-	 */
 	public function watchChildRow(Website_Model_DbTable_Row_Abstract $row)
 	{
-		$this->addEventWatcher($row, 'save', self::EVENT_POST_SAVE, null, false);
-		return $this;
+		throw new Exception('Use watchRow() instead !');
 	}
 
 	/**
@@ -461,17 +392,6 @@ class Website_Model_DbTable_Row_Abstract extends Zend_Db_Table_Row_Abstract
 	}
 
 	/**
-	 * Watch parent row and update it before current object's save
-	 * @deprecated Only parents can iterate through and update dependant rows.
-	 * @param Website_Model_DbTable_Row_Abstract $row
-	 * @return Website_Model_DbTable_Row_Abstract
-	 */
-	public function watchParentRow(Website_Model_DbTable_Row_Abstract $row)
-	{
-		throw new Website_Model_Exception('watchParentRow() is not supported anymore.');
-	}
-
-	/**
 	 * Find parent row from parent $table for the current row.
 	 * @param string|Zend_Db_Table_Abstract $parentTable
 	 * @param string|array|Zend_Db_Table_Select $where  OPTIONAL An SQL WHERE clause or Zend_Db_Table_Select object.
@@ -491,17 +411,12 @@ class Website_Model_DbTable_Row_Abstract extends Zend_Db_Table_Row_Abstract
 		} else {
 			$select = $where;
 		}
-
-		if ($where !== null) {
+		if ($where !== null)
 			$this->_where($select, $where);
-		}
-		if ($order !== null) {
+		if ($order !== null)
 			$this->_order($select, $order);
-		}
-		if ($count !== null || $offset !== null) {
+		if ($count !== null || $offset !== null)
 			$select->limit($count, $offset);
-		}
-
 		$result = parent::findParentRow($parentTable, $ruleKey, $select);
 		return $result;
 	}
@@ -676,6 +591,7 @@ class Website_Model_DbTable_Row_Abstract extends Zend_Db_Table_Row_Abstract
 
 	/**
 	 * Generate WHERE clause from user-supplied string or array
+	 * @param Zend_Db_Table_Select $select
 	 * @param  string|array $where  OPTIONAL An SQL WHERE clause.
 	 * @return Zend_Db_Table_Select
 	 */
@@ -707,14 +623,17 @@ class Website_Model_DbTable_Row_Abstract extends Zend_Db_Table_Row_Abstract
 	}
 
 	/**
-	 * Refresh data from the databse (cache is being refreshed too)
-	 * @return void|Website_Model_DbTable_Row_Abstract
+	 * @return Website_Model_DbTable_Row_Abstract
 	 */
-	public function refresh()
+	protected function _refresh()
 	{
-		$this->getRuntimeCache()->setIsEnabled(false);
-		parent::refresh();
-		$this->getRuntimeCache()->setIsEnabled(true);
+		if($this->getRuntimeCache()->isEnabled()){
+			$this->getRuntimeCache()->setIsEnabled(false);
+			parent::_refresh();
+			$this->getRuntimeCache()->setIsEnabled(true);
+		}else{
+			parent::_refresh();
+		}
 		return $this;
 	}
 
@@ -726,7 +645,7 @@ class Website_Model_DbTable_Row_Abstract extends Zend_Db_Table_Row_Abstract
 	 * @return mixed The primary key value(s), as an associative array if the
 	 *     key is compound, or a scalar if the key is single-column.
 	 */
-	final public function save()
+	public function save()
 	{
 		return parent::save();
 	}

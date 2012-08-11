@@ -161,17 +161,15 @@ class Generator_Template
 		foreach ($table->getChildren() as $child){
 			
 			$methodName = $child['child'];
-
 			if($table->countChildren( $methodName ) > 1){
-				$methodName = $methodName . '_by_' . $child['childKey'];
+				$methodName = $methodName . '_by_' . $table->formatForeignKeysMethodName($child['childCol']);
 			}
-			
+
 			$pattern = '#^'.$table->getName().'_(.*)$#i';
-			if(preg_match($pattern, $methodName)){
+			if(preg_match($pattern, $methodName))
 				$methodName = preg_replace($pattern, '\\1', $methodName);
-			}
 			$methodName = $table->formatFunctionName($methodName);
-			
+
 			// method 1 create
 			
 			$methodBody = '';
@@ -289,7 +287,7 @@ class Generator_Template
 				$methodName = 'parent_'.$methodName;
 			
 			if( $parents[$parent['parent']] > 1){
-				$methodName = $methodName . '_by_' . $parent['key'];
+				$methodName = $methodName . '_by_' . $table->formatForeignKeysMethodName($parent['col']);
 			}
 			
 			$children = $table->getChildren();
